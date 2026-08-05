@@ -4,12 +4,6 @@ using System.IO.Compression;
 
 namespace MeatyMod.Cli.Commands;
 
-public interface ICommand
-{
-    string Name { get; }
-    int Run(string[] args);
-}
-
 public class PackCommand : ICommand
 {
     public string Name => "pack";
