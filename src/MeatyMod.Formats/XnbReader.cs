@@ -1,17 +1,26 @@
+using System;
 using System.IO;
 
 namespace MeatyMod.Formats
 {
-    public class XnbReader
+    public static class XnbReader
     {
-        public void Read(BinaryReader reader)
+        public static XnbHeader ReadHeader(Stream stream)
         {
-            char[] magic = reader.ReadChars(3);
-            if (magic[0] != 'X' || magic[1] != 'N' || magic[2] != 'B')
-                throw new InvalidDataException("Not XNB file.");
-            
-            byte version = reader.ReadByte();
-            byte flags = reader.ReadByte();
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            using var reader = new BinaryReader(stream, System.Text.Encoding.UTF8, leaveOpen: true);
+            var magic = new string(reader.ReadChars(3));
+            if (magic != "XNB") throw new InvalidDataException("Not XNB file.");
+            var version = reader.ReadByte();
+            var flags = reader.ReadByte();
+            return new XnbHeader { Magic = magic, Version = version, Flags = flags };
         }
+    }
+
+    public class XnbHeader
+    {
+        public string Magic { get; set; }
+        public byte Version { get; set; }
+        public byte Flags { get; set; }
     }
 }
