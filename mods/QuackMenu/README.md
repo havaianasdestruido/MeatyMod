@@ -41,10 +41,30 @@ This zips the mod folder into `mod.zip` per `manifest.json`.
 
 ## Install
 
-The mod must be loaded inside the game process. Two paths:
+The mod must be loaded inside the game process via IL injection into `BloodandBacon.exe`. One command does it all:
 
-1. **Assembly injection** — use `MeatyMod.Injector` to patch `Blood.myGame` ctor so it calls `QuackMenu.QuackMenuEntry.Inject(this)` after `ScreenManager` creation. The suite injector is a skeleton; the patch call site is the documented integration point.
-2. **Manual** — place `QuackMenu.dll` + XNA deps beside `BloodandBacon.exe` and add the `Inject` call via any XNA4 assembly patcher.
+```
+dotnet build src\MeatyMod.Cli\MeatyMod.Cli.csproj
+meatymod inject "game\Blood and Bacon\BloodandBacon.exe" "mods\QuackMenu\src\QuackMenu\bin\Debug\net40\QuackMenu.dll"
+```
+
+What `inject` does:
+
+1. Backs up the game exe to `BloodandBacon.exe.backup`.
+2. Patches `Blood.myGame` ctor to call `QuackMenuEntry.Inject(this)` (Mono.Cecil IL patch).
+3. Copies `QuackMenu.dll` + `config.txt` next to the game exe.
+
+Then launch the game normally (via Steam). In-game press **F1** for the boss spawner menu.
+
+**Restore the original exe:**
+
+```
+meatymod restore "game\Blood and Bacon\BloodandBacon.exe"
+```
+
+## Manual injection
+
+Place `QuackMenu.dll` + XNA deps beside `BloodandBacon.exe` and add the `Inject` call via any XNA4 assembly patcher.
 
 On load the mod writes `quackmenu.log` next to the game exe for diagnostics.
 
