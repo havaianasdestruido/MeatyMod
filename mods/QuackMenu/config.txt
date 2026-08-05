@@ -1,0 +1,7 @@
+# QuackMenu configuration
+# Edit values then repack the mod.
+CreativeMode=true
+FlatWorld=true
+SpawnHeight=3
+OpenMenuKey=F1
+Bosses=Cutty,Princess,BoarKing,Twin

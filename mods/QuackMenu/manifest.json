@@ -1,0 +1,8 @@
+{
+  "Id": "quackmenu",
+  "Name": "QuackMenu",
+  "Version": "1.0.0",
+  "Author": "MeatyMod",
+  "Description": "Creative mode: spawn on a flat world, open a boss spawner menu (F1).",
+  "Replaces": []
+}
