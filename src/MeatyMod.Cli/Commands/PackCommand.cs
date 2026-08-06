@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Text;
 using MeatyMod.Core;
 
 namespace MeatyMod.Cli.Commands;
@@ -35,9 +37,11 @@ public class PackCommand : ICommand
             using var fileStream = new FileStream(zipPath, FileMode.Create);
             using var archive = new ZipArchive(fileStream, ZipArchiveMode.Create);
 
+            var checksums = new List<string>();
+
             foreach (var file in Directory.EnumerateFiles(modDir, "*", SearchOption.AllDirectories))
             {
-                var relPath = Path.GetRelativePath(modDir, file);
+                var relPath = Path.GetRelativePath(modDir, file).Replace('\\', '/');
 
                 if (new FileInfo(file).Length > FileSizeGuard.DefaultMaxBytes)
                 {
@@ -45,7 +49,17 @@ public class PackCommand : ICommand
                     continue;
                 }
 
-                archive.CreateEntryFromFile(file, relPath.Replace('\\', '/'), CompressionLevel.Optimal);
+                archive.CreateEntryFromFile(file, relPath, CompressionLevel.Optimal);
+                checksums.Add($"{relPath} {ChecksumUtil.Sha256File(file)}");
+            }
+
+            var checksumEntry = archive.CreateEntry("checksums.txt", CompressionLevel.Optimal);
+            using (var writer = new StreamWriter(checksumEntry.Open(), new UTF8Encoding(false)))
+            {
+                foreach (var line in checksums)
+                {
+                    writer.WriteLine(line);
+                }
             }
 
             Console.WriteLine($"Packed {modDir} -> {zipPath}");
