@@ -1,4 +1,4 @@
-# MeatyMod — mod suite for Blood & Bacon (XNA 4.0, Steam 434570)
+# MeatyMod
 
 MeatyMod is a C# .NET mod suite for Blood & Bacon. It packs content mods, injects .NET mod DLLs into the game executable via Mono.Cecil IL patching, parses the game's XNB/TXT/RAW asset formats, and verifies/restores installs. Ships two example mods (QuackMenu, Oink), both targeting .NET 4.0 / XNA 4.0.
 
