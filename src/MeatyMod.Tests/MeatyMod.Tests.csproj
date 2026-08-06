@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MeatyMod.Formats\MeatyMod.Formats.csproj" />
+    <ProjectReference Include="..\MeatyMod.Core\MeatyMod.Core.csproj" />
   </ItemGroup>
 
 </Project>

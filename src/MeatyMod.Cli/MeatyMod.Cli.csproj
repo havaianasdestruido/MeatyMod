@@ -10,6 +10,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\MeatyMod.Injector\MeatyMod.Injector.csproj" />
+    <ProjectReference Include="..\MeatyMod.Core\MeatyMod.Core.csproj" />
+    <ProjectReference Include="..\MeatyMod.Formats\MeatyMod.Formats.csproj" />
+    <ProjectReference Include="..\MeatyMod.Assets\MeatyMod.Assets.csproj" />
+    <ProjectReference Include="..\MeatyMod.Verifier\MeatyMod.Verifier.csproj" />
   </ItemGroup>
 
 </Project>

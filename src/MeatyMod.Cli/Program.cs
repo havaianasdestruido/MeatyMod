@@ -14,6 +14,9 @@ namespace MeatyMod.Cli
                 new InstallCommand(),
                 new InjectCommand(),
                 new RestoreCommand(),
+                new ManifestCommand(),
+                new VerifyCommand(),
+                new ParseCommand(),
             };
 
             if (args.Length == 0)

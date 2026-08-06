@@ -15,7 +15,7 @@ namespace MeatyMod.Core
         {
             var relativePath = Path.GetRelativePath(Directory.GetCurrentDirectory(), Path.GetFullPath(sourcePath));
             var destPath = Path.Combine(_backupRoot, relativePath);
-            Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+            Directory.CreateDirectory(Path.GetDirectoryName(destPath) ?? ".");
             File.Copy(sourcePath, destPath, overwrite: true);
         }
 
@@ -23,7 +23,7 @@ namespace MeatyMod.Core
         {
             var relativePath = Path.GetRelativePath(Directory.GetCurrentDirectory(), Path.GetFullPath(gamePath));
             var backupPath = Path.Combine(_backupRoot, relativePath);
-            Directory.CreateDirectory(Path.GetDirectoryName(gamePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(gamePath) ?? ".");
             File.Copy(backupPath, gamePath, overwrite: true);
         }
     }

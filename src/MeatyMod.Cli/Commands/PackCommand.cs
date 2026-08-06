@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using MeatyMod.Core;
 
 namespace MeatyMod.Cli.Commands;
 
@@ -31,7 +32,22 @@ public class PackCommand : ICommand
 
         try
         {
-            ZipFile.CreateFromDirectory(modDir, zipPath, CompressionLevel.Optimal, includeBaseDirectory: false);
+            using var fileStream = new FileStream(zipPath, FileMode.Create);
+            using var archive = new ZipArchive(fileStream, ZipArchiveMode.Create);
+
+            foreach (var file in Directory.EnumerateFiles(modDir, "*", SearchOption.AllDirectories))
+            {
+                var relPath = Path.GetRelativePath(modDir, file);
+
+                if (new FileInfo(file).Length > FileSizeGuard.DefaultMaxBytes)
+                {
+                    Console.Error.WriteLine($"Skipping oversized file: {relPath}");
+                    continue;
+                }
+
+                archive.CreateEntryFromFile(file, relPath.Replace('\\', '/'), CompressionLevel.Optimal);
+            }
+
             Console.WriteLine($"Packed {modDir} -> {zipPath}");
             return 0;
         }

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using MeatyMod.Core;
 
 namespace MeatyMod.Cli.Commands
 {
@@ -50,6 +51,12 @@ namespace MeatyMod.Cli.Commands
                     if (!targetPath.StartsWith(contentDir, StringComparison.OrdinalIgnoreCase))
                     {
                         Console.Error.WriteLine($"Skipping unsafe entry: {entry.FullName}");
+                        continue;
+                    }
+
+                    if (!FileSizeGuard.IsAllowed(entry.Length))
+                    {
+                        Console.Error.WriteLine($"Skipping oversized entry: {entry.FullName}");
                         continue;
                     }
 

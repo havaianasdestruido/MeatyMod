@@ -19,7 +19,7 @@ namespace MeatyMod.Formats
 
     public class XnbHeader
     {
-        public string Magic { get; set; }
+        public string Magic { get; set; } = string.Empty;
         public byte Version { get; set; }
         public byte Flags { get; set; }
     }
