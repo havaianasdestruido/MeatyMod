@@ -3,3 +3,6 @@ mod.zip
 bin/
 obj/
 *.log
+
+# crash log
+unfriendly.txt
