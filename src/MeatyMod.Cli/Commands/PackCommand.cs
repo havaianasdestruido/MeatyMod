@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
 using MeatyMod.Core;
 
@@ -15,7 +16,7 @@ public class PackCommand : ICommand
     {
         if (args.Length == 0)
         {
-            Console.Error.WriteLine("Usage: meaty pack <mod-directory>");
+            Console.Error.WriteLine("Usage: meatymod pack <mod-directory> [output.zip]");
             return 1;
         }
 
@@ -26,7 +27,9 @@ public class PackCommand : ICommand
             return 1;
         }
 
-        string zipPath = Path.Combine(Environment.CurrentDirectory, "mod.zip");
+        string zipPath = args.Length >= 2
+            ? Path.GetFullPath(args[1])
+            : Path.Combine(Environment.CurrentDirectory, "mod.zip");
         if (File.Exists(zipPath))
         {
             File.Delete(zipPath);
@@ -41,7 +44,16 @@ public class PackCommand : ICommand
 
             foreach (var file in Directory.EnumerateFiles(modDir, "*", SearchOption.AllDirectories))
             {
-                var relPath = Path.GetRelativePath(modDir, file).Replace('\\', '/');
+                var relPath = Path.GetRelativePath(modDir, file);
+                var relNorm = relPath.Replace('\\', '/');
+                var segments = relNorm.Split('/');
+
+                if (segments.Any(s => string.Equals(s, "bin", StringComparison.OrdinalIgnoreCase)
+                                      || string.Equals(s, "obj", StringComparison.OrdinalIgnoreCase))
+                    || segments.Any(s => s.StartsWith(".", StringComparison.Ordinal)))
+                {
+                    continue;
+                }
 
                 if (new FileInfo(file).Length > FileSizeGuard.DefaultMaxBytes)
                 {
@@ -49,8 +61,8 @@ public class PackCommand : ICommand
                     continue;
                 }
 
-                archive.CreateEntryFromFile(file, relPath, CompressionLevel.Optimal);
-                checksums.Add($"{relPath} {ChecksumUtil.Sha256File(file)}");
+                archive.CreateEntryFromFile(file, relNorm, CompressionLevel.Optimal);
+                checksums.Add($"{relNorm}  {ChecksumUtil.Sha256File(file)}");
             }
 
             var checksumEntry = archive.CreateEntry("checksums.txt", CompressionLevel.Optimal);

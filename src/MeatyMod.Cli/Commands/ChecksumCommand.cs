@@ -37,7 +37,7 @@ public class ChecksumCommand : ICommand
                 {
                     try
                     {
-                        var relPath = Path.GetRelativePath(target, file);
+                        var relPath = Path.GetRelativePath(target, file).Replace('\\', '/');
                         Console.WriteLine($"{relPath}  {ChecksumUtil.Sha256File(file)}");
                     }
                     catch (IOException ex)

@@ -129,6 +129,92 @@ public class PackInstallTests
         }
     }
 
+    [Fact]
+    public void Pack_ExcludesNestedBinObjAndDotfiles()
+    {
+        var tempRoot = CreateTempDir();
+        var originalCwd = Directory.GetCurrentDirectory();
+        try
+        {
+            var modDir = Path.Combine(tempRoot, "Mod");
+            Directory.CreateDirectory(modDir);
+            File.WriteAllText(Path.Combine(modDir, "config.txt"), "x");
+            Directory.CreateDirectory(Path.Combine(modDir, "src", "Mod", "bin", "Release"));
+            File.WriteAllText(Path.Combine(modDir, "src", "Mod", "bin", "Release", "Mod.dll"), "MZ");
+            Directory.CreateDirectory(Path.Combine(modDir, "src", "Mod", "obj"));
+            File.WriteAllText(Path.Combine(modDir, "src", "Mod", "obj", "Mod.pdb"), "dbg");
+            File.WriteAllText(Path.Combine(modDir, ".gitignore"), "bin/");
+            File.WriteAllText(Path.Combine(modDir, "src", "Mod", "Mod.cs"), "class {}");
+
+            Directory.SetCurrentDirectory(tempRoot);
+            var result = new PackCommand().Run(new[] { modDir });
+            Assert.Equal(0, result);
+
+            using var archive = ZipFile.OpenRead(Path.Combine(tempRoot, "mod.zip"));
+            var names = archive.Entries.Select(e => e.FullName).ToList();
+            Assert.Contains("config.txt", names);
+            Assert.Contains("src/Mod/Mod.cs", names);
+            Assert.DoesNotContain(names, n => n.Contains("bin/") || n.Contains("obj/") || n.StartsWith(".gitignore"));
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(originalCwd);
+            Directory.Delete(tempRoot, true);
+        }
+    }
+
+    [Fact]
+    public void Pack_ChecksumsTxtMatchesChecksumCommandFormat()
+    {
+        var tempRoot = CreateTempDir();
+        var originalCwd = Directory.GetCurrentDirectory();
+        try
+        {
+            var modDir = Path.Combine(tempRoot, "Mod");
+            Directory.CreateDirectory(modDir);
+            File.WriteAllText(Path.Combine(modDir, "config.txt"), "x");
+            Directory.CreateDirectory(Path.Combine(modDir, "sub"));
+            File.WriteAllText(Path.Combine(modDir, "sub", "asset.bin"), "data");
+
+            Directory.SetCurrentDirectory(tempRoot);
+            var result = new PackCommand().Run(new[] { modDir, Path.Combine(tempRoot, "m.zip") });
+            Assert.Equal(0, result);
+
+            using var archive = ZipFile.OpenRead(Path.Combine(tempRoot, "m.zip"));
+            var checksumEntry = archive.Entries.First(e => e.FullName == "checksums.txt");
+            using var reader = new StreamReader(checksumEntry.Open());
+            var zipLines = reader.ReadToEnd().Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Trim()).ToList();
+
+            var cmdOut = new StringWriter();
+            var originalOut = Console.Out;
+            Console.SetOut(cmdOut);
+            try
+            {
+                new ChecksumCommand().Run(new[] { modDir });
+            }
+            finally
+            {
+                Console.SetOut(originalOut);
+            }
+
+            var cliLines = cmdOut.ToString().Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Where(l => !l.TrimStart().StartsWith("Files:"))
+                .Select(l => l.Trim()).ToList();
+
+            Assert.Equal(cliLines.Count, zipLines.Count);
+            foreach (var line in zipLines)
+            {
+                Assert.Contains(cliLines, l => l == line);
+            }
+        }
+        finally
+        {
+            Directory.SetCurrentDirectory(originalCwd);
+            Directory.Delete(tempRoot, true);
+        }
+    }
+
     private static string CreateTempDir()
     {
         var dir = Path.Combine(Path.GetTempPath(), "meaty_pack_" + Guid.NewGuid().ToString("N"));

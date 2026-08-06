@@ -36,19 +36,27 @@ namespace MeatyMod.Cli.Commands
                 if (!hasModFlag)
                 {
                     positional.Add(args[0]);
-                    positional.Add(args[1]);
-                    if (args.Length >= 3 && args[2] != "--entry")
-                    {
-                        positional.Add(args[2]);
-                    }
-                    modDllPaths.Add(Path.GetFullPath(args[1]));
                     string entry = null;
                     var entryIndex = Array.FindIndex(args, a => a == "--entry");
                     if (entryIndex >= 0 && entryIndex + 1 < args.Length)
                     {
                         entry = args[entryIndex + 1];
                     }
+
+                    var dllIndex = 1;
+                    if (args.Length > 1 && args[1] == "--entry")
+                    {
+                        Console.Error.WriteLine("Usage: meatymod inject <game-exe> <mod-dll> [output-exe] [--entry <TypeName>]");
+                        return 1;
+                    }
+                    modDllPaths.Add(Path.GetFullPath(args[dllIndex]));
                     entryTypeNames.Add(entry);
+
+                    var outputIndex = args.Length >= 3 && args[2] != "--entry" ? 2 : -1;
+                    if (outputIndex >= 0)
+                    {
+                        positional.Add(args[outputIndex]);
+                    }
                 }
                 else
                 {
