@@ -17,6 +17,8 @@ namespace MeatyMod.Cli
                 new ManifestCommand(),
                 new VerifyCommand(),
                 new ParseCommand(),
+                new XnbCommand(),
+                new ChecksumCommand(),
             };
 
             if (args.Length == 0)

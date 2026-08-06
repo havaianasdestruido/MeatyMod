@@ -48,7 +48,7 @@ public static class RawReader
         }
 
         var samples = length / 2;
-        int[] sizes = [512, 1024, 2048, 4096];
+        int[] sizes = [512, 1024, 2000, 2048, 4096];
 
         foreach (var size in sizes)
         {
