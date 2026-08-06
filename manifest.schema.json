@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MeatyMod Manifest",
+  "type": "object",
+  "required": ["Id", "Name", "Version", "Author"],
+  "additionalProperties": false,
+  "properties": {
+    "Id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "Name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Version": {
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+)*$"
+    },
+    "Author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Description": {
+      "type": "string"
+    },
+    "Replaces": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
