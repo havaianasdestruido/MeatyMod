@@ -4,8 +4,15 @@ setlocal
 set "SCRIPT_DIR=%~dp0"
 set "REPO=%SCRIPT_DIR%..\.."
 set "GAME_EXE=%REPO%\game\Blood and Bacon\BloodandBacon.exe"
-set "MEATYMOD=%REPO%\src\MeatyMod.Cli\bin\Release\net10.0\meatymod.exe"
-if not exist "%MEATYMOD%" set "MEATYMOD=%REPO%\src\MeatyMod.Cli\bin\Debug\net10.0\meatymod.exe"
+set "MEATYMOD_REL=%REPO%\src\MeatyMod.Cli\bin\Release\net10.0\meatymod.exe"
+set "MEATYMOD_DBG=%REPO%\src\MeatyMod.Cli\bin\Debug\net10.0\meatymod.exe"
+set "MEATYMOD=%MEATYMOD_REL%"
+if not exist "%MEATYMOD_REL%" set "MEATYMOD=%MEATYMOD_DBG%"
+if exist "%MEATYMOD_REL%" if exist "%MEATYMOD_DBG%" (
+    for %%A in ("%MEATYMOD_REL%") do set "REL_T=%%~tA"
+    for %%A in ("%MEATYMOD_DBG%") do set "DBG_T=%%~tA"
+    if "%DBG_T%" GTR "%REL_T%" set "MEATYMOD=%MEATYMOD_DBG%"
+)
 set "OINK_DLL=%REPO%\mods\Oink\src\Oink\bin\Release\net40\Oink.dll"
 set "QUACK_DLL=%REPO%\mods\QuackMenu\src\QuackMenu\bin\Release\net40\QuackMenu.dll"
 

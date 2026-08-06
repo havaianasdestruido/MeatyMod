@@ -1,0 +1,1 @@
+batchfile scripts for people who are lazy to load them manually
