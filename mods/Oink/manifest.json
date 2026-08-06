@@ -1,0 +1,8 @@
+{
+  "Id": "oink",
+  "Name": "Oink",
+  "Version": "1.0.0",
+  "Author": "MeatyMod",
+  "Description": "Turn the player into a pig: pig skin texture + sprint speed multiplier (toggle with O).",
+  "Replaces": []
+}

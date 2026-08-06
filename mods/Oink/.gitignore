@@ -1,0 +1,4 @@
+bin/
+obj/
+*.log
+mod.zip

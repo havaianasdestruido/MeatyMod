@@ -1,0 +1,7 @@
+# Oink configuration
+# Edit values then repack the mod.
+Enabled=true
+PigSkin=true
+SpeedMultiplier=1.35
+ToggleKey=O
+PigTexture=npc/piggy1
