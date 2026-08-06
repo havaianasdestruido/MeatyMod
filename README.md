@@ -6,9 +6,9 @@ MeatyMod is a C# .NET mod suite for Blood & Bacon. It packs content mods, inject
 
 | Project | Purpose |
 | --- | --- |
-| MeatyMod.Cli | `meatymod` CLI (pack/install/inject/restore/manifest/verify/parse) |
-| MeatyMod.Core | ModManifest, ModManifestLoader, BackupManager, VersionInfo 0.1.0, FileSizeGuard |
-| MeatyMod.Formats | XnbReader + TxtReader, CameraTrackParser, DialogueParser |
+| MeatyMod.Cli | `meatymod` CLI (pack/install/inject/restore/manifest/verify/parse/xnb/checksum) |
+| MeatyMod.Core | ModManifest, ModManifestLoader, BackupManager, ChecksumUtil, VersionInfo 1.0.0, FileSizeGuard |
+| MeatyMod.Formats | XnbReader (XNB decompression), TxtReader, RawReader, CameraTrackParser, DialogueParser |
 | MeatyMod.Assets | AssetManifestBuilder |
 | MeatyMod.Verifier | AssetValidator (ValidateXnb, ValidateDirectory) |
 | MeatyMod.Injector | Mono.Cecil injection, auto-detects mod entry type |
@@ -25,13 +25,17 @@ Install a mod by packing it to a zip and injecting the DLL into the game exe (`g
 
 ## CLI
 
-- `meatymod pack <mod-dir>` — pack a mod directory into a zip.
+- `meatymod pack <mod-dir>` — pack a mod directory into a zip (writes `checksums.txt` inside).
 - `meatymod install <mod-zip> <game-path>` — install a mod zip into a game folder.
-- `meatymod inject <game-exe> <mod-dll> [output-exe] [--entry <TypeName>]` — IL-patch a mod into the exe.
+- `meatymod inject <game-exe> [--mod <dll> [--entry <TypeName>]]... [output-exe]` — IL-patch one or more mods into the exe.
 - `meatymod restore <patched-exe>` — restore a patched exe from backup.
 - `meatymod manifest <game-content-dir> [out.json]` — build an asset manifest.
 - `meatymod verify <xnb-file-or-dir>` — validate XNB files.
-- `meatymod parse <txt-file>` — parse a TXT asset (day file, camera track, or dialogue).
+- `meatymod parse <file>` — parse a TXT asset (day file, camera track, or dialogue) or a `.raw` heightmap.
+- `meatymod xnb <xnb-file-or-dir>` — dump XNB header info (platform, version, flags, compressed/decompressed sizes).
+- `meatymod checksum <file-or-dir>` — print SHA-256 checksums for a file or every file under a directory.
+
+`pack` embeds a `checksums.txt` (relative path + SHA-256 per file) in every mod zip; `checksum` reproduces that list for any file or directory.
 
 ## Build
 
@@ -59,7 +63,7 @@ Build the CLI, then pack and inject the example mods:
 dotnet build src\MeatyMod.Cli\MeatyMod.Cli.csproj
 dotnet run --project src\MeatyMod.Cli --no-build -- pack mods\QuackMenu
 dotnet run --project src\MeatyMod.Cli --no-build -- pack mods\Oink
-dotnet run --project src\MeatyMod.Cli --no-build -- inject "game\Blood and Bacon\BloodandBacon.exe" mods\Oink\Oink.dll
+dotnet run --project src\MeatyMod.Cli --no-build -- inject "game\Blood and Bacon\BloodandBacon.exe" --mod mods\QuackMenu\src\QuackMenu\bin\Debug\net40\QuackMenu.dll --mod mods\Oink\src\Oink\bin\Debug\net40\Oink.dll
 ```
 
 Restore the original exe:
@@ -68,8 +72,14 @@ Restore the original exe:
 dotnet run --project src\MeatyMod.Cli --no-build -- restore "game\Blood and Bacon\BloodandBacon.exe"
 ```
 
+## Release
+
+- `tools\release.ps1` — build the CLI, pack the example mods, and assemble the release artifact (dist zip) with checksums.
+- `THIRD_PARTY_NOTICES.md` — third-party notices for bundled dependencies.
+- `tools\smoke.ps1` — game smoke suite for post-install verification.
+
 ## Notes / Limits
 
-- One mod injectable at a time (IL ctor patch).
+- Multi-mod injection: pass repeated `--mod <dll>` to `inject` to patch several mods into one exe.
 - `game\` is read-only and gitignored.
 - XNA 4.0 only; .NET 4.0 targets.
