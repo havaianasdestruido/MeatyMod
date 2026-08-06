@@ -16,6 +16,7 @@ namespace Oink
         private static OinkHook _hook;
         private static bool _enabled = true;
         private static Dictionary<Keys, bool> _lastKeys = new Dictionary<Keys, bool>();
+        private static bool _hadScreen;
 
         public static void Inject(Game game)
         {
@@ -71,6 +72,12 @@ namespace Oink
             }
 
             object gameScreen = _screenManager == null ? null : OinkReflect.FindGameScreen(_screenManager);
+            bool hasScreen = gameScreen != null;
+            if (hasScreen != _hadScreen)
+            {
+                _hadScreen = hasScreen;
+                Log(hasScreen ? "Game screen found: " + gameScreen.GetType().FullName : "Game screen lost (null).");
+            }
             if (_enabled)
             {
                 if (ParseBool(_config.PigSkin, true))

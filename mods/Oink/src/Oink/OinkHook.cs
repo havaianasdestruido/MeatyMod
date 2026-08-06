@@ -12,8 +12,15 @@ namespace Oink
 
         public override void Update(GameTime gameTime)
         {
+            if (!_loggedOnce)
+            {
+                _loggedOnce = true;
+                OinkEntry.Log("Hook update fired (first call). ScreenManager=" + (OinkEntry.ScreenManager == null ? "null" : OinkEntry.ScreenManager.GetType().FullName));
+            }
             OinkEntry.Update();
             base.Update(gameTime);
         }
+
+        private static bool _loggedOnce;
     }
 }

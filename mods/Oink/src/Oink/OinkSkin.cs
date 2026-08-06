@@ -49,7 +49,14 @@ namespace Oink
 
             OinkReflect.SetField(gameScreen, "player1Texture", _pig);
             OinkReflect.SetField(gameScreen, "player1TextureOrig", _pig);
+            if (!_appliedLogged)
+            {
+                _appliedLogged = true;
+                OinkEntry.Log("Pig skin applied to player1Texture/player1TextureOrig.");
+            }
         }
+
+        private static bool _appliedLogged;
 
         public static void Restore(object gameScreen)
         {
