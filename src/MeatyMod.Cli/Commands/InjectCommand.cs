@@ -12,8 +12,15 @@ namespace MeatyMod.Cli.Commands
         {
             if (args.Length < 2)
             {
-                Console.Error.WriteLine("Usage: meatymod inject <game-exe> <mod-dll> [output-exe]");
+                Console.Error.WriteLine("Usage: meatymod inject <game-exe> <mod-dll> [output-exe] [--entry <TypeName>]");
                 return 1;
+            }
+
+            string entryTypeName = null;
+            var entryIndex = Array.FindIndex(args, a => a == "--entry");
+            if (entryIndex >= 0 && entryIndex + 1 < args.Length)
+            {
+                entryTypeName = args[entryIndex + 1];
             }
 
             var exePath = Path.GetFullPath(args[0]);
@@ -24,7 +31,7 @@ namespace MeatyMod.Cli.Commands
 
             try
             {
-                AssemblyInjector.Patch(exePath, modDll, outputPath, backupPath);
+                AssemblyInjector.Patch(exePath, modDll, outputPath, backupPath, entryTypeName);
 
                 File.Copy(modDll, Path.Combine(outputDir, Path.GetFileName(modDll)), overwrite: true);
 
@@ -33,6 +40,15 @@ namespace MeatyMod.Cli.Commands
                 if (File.Exists(configPath))
                 {
                     File.Copy(configPath, Path.Combine(outputDir, "config.txt"), overwrite: true);
+                }
+
+                var modName = Path.GetFileNameWithoutExtension(modDll);
+                if (File.Exists(configPath))
+                {
+                    File.Copy(configPath, Path.Combine(outputDir, modName + ".txt"), overwrite: true);
+                    var contentDir = Path.Combine(outputDir, "Content", modName);
+                    Directory.CreateDirectory(contentDir);
+                    File.Copy(configPath, Path.Combine(contentDir, "config.txt"), overwrite: true);
                 }
 
                 Console.WriteLine($"Patched {outputPath}");

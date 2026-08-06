@@ -8,7 +8,7 @@ namespace MeatyMod.Injector
 {
     public static class AssemblyInjector
     {
-        public static bool Patch(string exePath, string modDllPath, string outputPath, string backupPath)
+        public static bool Patch(string exePath, string modDllPath, string outputPath, string backupPath, string entryTypeName = null)
         {
             if (!File.Exists(exePath))
             {
@@ -36,16 +36,18 @@ namespace MeatyMod.Injector
                 throw new InvalidOperationException("Blood.myGame instance constructor not found.");
             }
 
-            var entryType = modModule.Types.FirstOrDefault(t => t.FullName == "QuackMenu.QuackMenuEntry");
+            var entryType = ResolveEntryType(modModule, entryTypeName);
             if (entryType == null)
             {
-                throw new InvalidOperationException("QuackMenu.QuackMenuEntry type not found in mod DLL.");
+                throw new InvalidOperationException(string.IsNullOrEmpty(entryTypeName)
+                    ? "No mod entry type found in mod DLL."
+                    : $"Mod entry type not found: {entryTypeName}");
             }
 
-            var inject = entryType.Methods.FirstOrDefault(m => m.Name == "Inject" && m.Parameters.Count == 1);
+            var inject = entryType.Methods.FirstOrDefault(m => m.IsStatic && m.Name == "Inject" && m.Parameters.Count == 1);
             if (inject == null)
             {
-                throw new InvalidOperationException("QuackMenuEntry.Inject(Game) method not found in mod DLL.");
+                throw new InvalidOperationException($"{entryType.FullName}.Inject(Game) method not found in mod DLL.");
             }
 
             var injectRef = gameModule.ImportReference(inject);
@@ -61,6 +63,25 @@ namespace MeatyMod.Injector
 
             gameModule.Write(outputPath);
             return true;
+        }
+
+        private static TypeDefinition ResolveEntryType(ModuleDefinition modModule, string entryTypeName)
+        {
+            if (!string.IsNullOrEmpty(entryTypeName))
+            {
+                return modModule.Types.FirstOrDefault(t => t.FullName == entryTypeName);
+            }
+
+            var legacy = modModule.Types.FirstOrDefault(t => t.FullName == "QuackMenu.QuackMenuEntry");
+            if (legacy != null)
+            {
+                return legacy;
+            }
+
+            var candidates = modModule.Types
+                .Where(t => t.Methods.Any(m => m.IsStatic && m.Name == "Inject" && m.Parameters.Count == 1))
+                .OrderByDescending(t => t.Name.EndsWith("Entry"));
+            return candidates.FirstOrDefault();
         }
     }
 }
