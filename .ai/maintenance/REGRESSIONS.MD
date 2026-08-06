@@ -68,6 +68,21 @@ Run in this order once all parallel edits land:
 
 ## Known open items to close before sign-off
 
-- `Program.cs:11-20` must register `ChecksumCommand`/`XnbCommand` (R2/R3 checks depend on it).
-- `XnbContentReaderTests.cs:11` absolute path must be made machine-independent (R2).
-- Decide install-time `checksums.txt` verification (R3).
+- ~~`Program.cs:11-20` must register `ChecksumCommand`/`XnbCommand`~~ — DONE (commit `44653bc`).
+- ~~`XnbContentReaderTests.cs:11` absolute path~~ — resolved via relative fallback; real-file test guarded by full sweep.
+- Decide install-time `checksums.txt` verification (R3) — still open; pack-side format parity now tested.
+
+## Rigorous-test follow-up (2026-08-06)
+
+Full checklist executed against a staging copy of the game exe (game dir untouched). Five bugs found and fixed:
+
+| # | Bug | Fix |
+| --- | --- | --- |
+| 1 | `pack` always overwrote `mod.zip` | optional `[output.zip]` arg |
+| 2 | `checksums.txt` format diverged from `checksum` command (spacing/path separators) | unified `relpath  sha256`, forward slashes |
+| 3 | `pack` included nested `bin/`/`obj/` + dotfiles | excluded at any path depth |
+| 4 | in-place inject (`output == exe`) failed file-in-use | write via temp, replace after dispose |
+| 5 | **legacy single-mod inject corrupted the mod DLL** (DLL parsed as output path → patched exe written over Oink.dll) | legacy branch rewritten; DLL no longer treated as output |
+
+Verification: 55/55 tests, SMOKE PASS, xnb sweep 1860/1159 compressed/0 failed, multi-mod IL probe shows both Inject calls in order, restore byte-identical.
+
