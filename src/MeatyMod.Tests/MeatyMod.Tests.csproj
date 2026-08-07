@@ -24,6 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Fixtures\darkFog3_0.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MeatyMod.Formats\MeatyMod.Formats.csproj" />
     <ProjectReference Include="..\MeatyMod.Core\MeatyMod.Core.csproj" />
     <ProjectReference Include="..\MeatyMod.Injector\MeatyMod.Injector.csproj" />
