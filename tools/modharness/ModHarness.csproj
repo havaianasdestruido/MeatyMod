@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <NuGetAudit>false</NuGetAudit>
+    <NoWarn>CA1416;CA1418;CA1859;CA1860;CA1051;CA1303;CA1307;CA1310;CA1707;CA1716;CA1822;CA1849;CA2211;CA1031;IDE0007;IDE0011;SYSLIB0019</NoWarn>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Microsoft.Xna.Framework.Input.Touch.dll" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+</Project>
