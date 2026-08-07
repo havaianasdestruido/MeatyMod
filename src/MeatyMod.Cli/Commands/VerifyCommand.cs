@@ -34,6 +34,11 @@ namespace MeatyMod.Cli.Commands
 
                 var result = AssetValidator.ValidateDirectory(path);
                 Console.WriteLine($"Valid: {result.Valid} Invalid: {result.Invalid} Total: {result.Total}");
+                if (result.Total == 0)
+                {
+                    Console.Error.WriteLine("No XNB files found (empty content directory?)");
+                    return 1;
+                }
                 return result.Valid == result.Total ? 0 : 1;
             }
             catch (Exception ex)
