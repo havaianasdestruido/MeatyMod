@@ -1,6 +1,6 @@
 # MeatyMod release packager.
-# Builds the solution in Release, stages a distributable layout, writes SHA-256
-# sums, and compresses it into dist\meatymod-<version>.zip.
+# Builds the solution in Release, packs the example mods, stages a distributable
+# layout, writes SHA-256 sums, and compresses it into dist\meatymod-<version>.zip.
 #
 # Usage:
 #   powershell -ExecutionPolicy Bypass -File tools\release.ps1
@@ -34,7 +34,7 @@ try {
         throw "dotnet build failed with exit code $LASTEXITCODE"
     }
 
-    Write-Host '[1/6] Reading version ...'
+    Write-Host '[2/8] Reading version ...'
     $raw = Get-Content -Raw -LiteralPath $VersionFile
     $match = [regex]::Match($raw, 'Version\s*=\s*"([^"]+)"')
     if (-not $match.Success) {
@@ -53,7 +53,7 @@ try {
     $LibDir = Join-Path $StagingDir 'lib'
     New-Item -ItemType Directory -Path $LibDir -Force | Out-Null
 
-    Write-Host "[2/6] Staging release under $StagingDir ..."
+    Write-Host "[3/8] Staging release under $StagingDir ..."
     foreach ($name in 'meatymod.exe', 'meatymod.dll', 'meatymod.runtimeconfig.json', 'meatymod.deps.json') {
         $src = Join-Path $BuildOut $name
         if (Test-Path -LiteralPath $src) {
@@ -67,11 +67,25 @@ try {
         Copy-Item -LiteralPath $_.FullName -Destination $LibDir
     }
 
-    Write-Host '[3/6] Copying documentation ...'
+    Write-Host '[4/8] Packing example mods ...'
+    $MeatyModExe = Join-Path $LibDir 'meatymod.exe'
+    foreach ($modName in 'Oink', 'QuackMenu') {
+        $modDir = Join-Path $RepoRoot ('mods\' + $modName)
+        if (-not (Test-Path -LiteralPath $modDir)) {
+            throw "Example mod directory not found: $modDir"
+        }
+        $modZip = Join-Path $StagingDir ($modName + '.zip')
+        & $MeatyModExe pack $modDir $modZip
+        if ($LASTEXITCODE -ne 0) {
+            throw "meatymod pack failed for $modName with exit code $LASTEXITCODE"
+        }
+    }
+
+    Write-Host '[5/8] Copying documentation ...'
     Copy-Item -LiteralPath (Join-Path $RepoRoot 'THIRD_PARTY_NOTICES.md') -Destination $StagingDir
     Copy-Item -LiteralPath (Join-Path $RepoRoot 'README.md') -Destination $StagingDir
 
-    Write-Host '[4/6] Computing SHA-256 sums ...'
+    Write-Host '[6/8] Computing SHA-256 sums ...'
     $sumLines = @()
     foreach ($file in (Get-ChildItem -LiteralPath $StagingDir -Recurse -File | Sort-Object FullName)) {
         $rel = Get-RelativePath -Root $StagingDir -Path $file.FullName
@@ -81,7 +95,7 @@ try {
     $sumLines | Set-Content -LiteralPath (Join-Path $StagingDir 'SHA256SUMS.txt') -Encoding Ascii
     Write-Host ("SHA256SUMS.txt entries: {0}" -f $sumLines.Count)
 
-    Write-Host '[5/6] Compressing staging directory ...'
+    Write-Host '[7/8] Compressing staging directory ...'
     if (-not (Test-Path -LiteralPath $DistDir)) {
         New-Item -ItemType Directory -Path $DistDir | Out-Null
     }
@@ -91,7 +105,7 @@ try {
     }
     Compress-Archive -Path $StagingDir -DestinationPath $ZipPath -CompressionLevel Optimal
 
-    Write-Host '[6/6] Done.'
+    Write-Host '[8/8] Done.'
     Write-Host ("Version      : {0}" -f $Version)
     Write-Host ("Archive      : {0}" -f $ZipPath)
     Write-Host ("Staged files : {0}" -f $sumLines.Count)
