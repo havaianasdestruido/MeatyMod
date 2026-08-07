@@ -9,6 +9,23 @@ powershell -ExecutionPolicy Bypass -File tools\smoke.ps1
 ```
 Prints `SMOKE PASS` and exits 0, or `SMOKE FAIL <detail>` and exits 1.
 
+## Build / QA Entry Points
+
+| Script | What it does |
+| --- | --- |
+| `all.bat` | Builds `src\MeatyMod.sln` (Release), `tools\modharness`, `tools\memscan`, then both mods via `mods\Oink\build.bat` and `mods\QuackMenu\build.bat`. All Release. |
+| `mods\Oink\build.bat` / `mods\QuackMenu\build.bat` | Mod-only Release build (output `mods\<Mod>\src\<Mod>\bin\Release\net40\<Mod>.dll`). |
+| `mods\Oink\run.bat` / `mods\QuackMenu\run.bat` | Build, then `meatymod restore` -> `meatymod inject <dll>` -> launch `BloodandBacon.exe` -> `meatymod restore`. Uses the newest Release/Debug `meatymod.exe`. |
+
+The smoke suite itself is unchanged and remains read-only on the game tree; these scripts are the build/QA entry points that produce the artifacts the smoke suite and manual runs depend on.
+
+## Related QA Tooling
+
+- `tools\modharness` - headless Inject proof harness (x86), supplementary non-smoke check for injection correctness.
+- `tools\memscan` - process memory viewer, supplementary non-smoke diagnostic for inspecting a running game process.
+
+Both are built by `all.bat` and are not part of the smoke suite.
+
 ## What It Checks
 1. **Build** - `dotnet build src\MeatyMod.Cli\MeatyMod.Cli.csproj -c Debug` must exit 0.
 2. **verify** - `meatymod.exe verify "game\Blood and Bacon"` must exit 0 and its output must parse (regex) to `Valid: 1860` and `Invalid: 0`.
@@ -26,7 +43,7 @@ The CLI is invoked via the built binary directly (`src\MeatyMod.Cli\bin\Debug\ne
 | --- | --- |
 | Total `.xnb` under game tree | 1860 |
 | `.xnb` under `Content\` | 1396 |
-| `.txt` under game tree | 707 |
+| `.txt` under game tree | 709 |
 | `.txt` under `ABCDE3\` | 676 |
 | `.raw` heightmaps | 2 |
 | `earth.raw` / `earth2.raw` size | 8,000,000 bytes each |

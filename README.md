@@ -35,6 +35,20 @@ I will not add a whole ass script for detecting if it will execute MEMZ or any o
 
 Install a mod by packing it to a zip and injecting the DLL into the game exe (`game\Blood and Bacon\BloodandBacon.exe`). Each mod carries its own `lib\xna\`.
 
+Each mod also ships build/run scripts. `build.bat` compiles the mod's csproj in Release; `run.bat` builds the mod, then restores the exe, injects the mod, launches the game, and restores the exe again — it picks the newest `meatymod.exe` and never leaves the exe patched.
+
+| Script | Purpose |
+| --- | --- |
+| `mods\Oink\build.bat` | build Oink.csproj (`dotnet build -c Release`) |
+| `mods\Oink\run.bat` | build Oink, then restore -> inject -> launch game -> restore |
+| `mods\QuackMenu\build.bat` | build QuackMenu.csproj (`dotnet build -c Release`) |
+| `mods\QuackMenu\run.bat` | build QuackMenu, then restore -> inject -> launch game -> restore |
+| `mods\launch\launch-oink.bat` | inject Oink and launch the game (assumes Oink.dll already built) |
+| `mods\launch\launch-quackmenu.bat` | inject QuackMenu and launch the game (assumes QuackMenu.dll already built) |
+| `mods\launch\launch-both.bat` | inject Oink + QuackMenu and launch the game (assumes both already built) |
+
+The `mods\launch\` scripts assume the mod DLLs are already built (they error out and print the build command if not); the per-mod `run.bat` scripts build first, so they are the one-command path to a modded game session.
+
 ## CLI
 
 - `meatymod pack <mod-dir>` — pack a mod directory into a zip (writes `checksums.txt` inside).
@@ -51,6 +65,14 @@ Install a mod by packing it to a zip and injecting the DLL into the game exe (`g
 
 ## Build
 
+`all.bat` is the one-shot build for the whole repo — the `src` solution, `tools\modharness`, `tools\memscan`, and both mods, all in Release:
+
+```
+all.bat
+```
+
+Or build the solution only:
+
 ```
 dotnet build src\MeatyMod.sln
 ```
@@ -66,6 +88,30 @@ dotnet build src\MeatyMod.Cli\MeatyMod.Cli.csproj
 ```
 dotnet test src\MeatyMod.Tests\MeatyMod.Tests.csproj
 ```
+
+## QA Tools
+
+| Tool | Purpose |
+| --- | --- |
+| `tools\modharness` | headless proof that an injected mod's `OinkEntry.Inject` code executes without launching the game (18 checks: assembly load, entry resolution, shim game construction, component hooks, log + config output) |
+| `tools\memscan` | process memory viewer: module enumeration + heap marker scan of a running process |
+
+```
+dotnet build tools\modharness\ModHarness.csproj -c Release   -> tools\modharness\bin\Release\net10.0-windows\ModHarness.exe
+dotnet build tools\memscan\MemScan.csproj -c Release        -> tools\memscan\bin\Release\net10.0\memscan.exe
+```
+
+memscan usage:
+
+```
+memscan <name-or-pid> [--marker ...] [--find-module ...] [--max-hits n]
+```
+
+- `--marker` — string to search the target's committed readable memory for (UTF-16LE + UTF-8). Default: `"Oink injected"`.
+- `--find-module` — module name that must appear in the loaded-module list (e.g. `Oink.dll`). Default: `Oink.dll`.
+- `--max-hits` — how many hit addresses to print with hex context. Default: `5`.
+
+Exit codes: `0` all requested checks passed, `1` error (process not found / access denied / bad usage), `2` scan ran but a check failed. To scan a live game, launch it via `mods\launch\launch-oink.bat` and run `memscan BloodandBacon` while it is running.
 
 ## Examples
 

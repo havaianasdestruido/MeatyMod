@@ -74,7 +74,29 @@ PigTexture=npc/piggy1
 
 ## Notes / Limits
 
-- The pig skin is the game's own pig texture applied to the human model's UV layout, so some parts may look misaligned/mismatched. This is the tradeoff: the pig's skeleton (Bip01) is incompatible with the player's rig, and the game hardcodes farmer bone indices.
 - Only one mod can be injected at a time — the IL patch adds a single `Inject` call to `Blood.myGame`'s ctor.
 - If Oink is disabled, the skin reverts to the normal character texture after respawn (the game rebuilds the local skin on respawn).
-- Read-only research in `.ai/report/`; unknown game internals are logged, never assumed.
+- Unknown game internals are logged, never assumed.
+
+## Limitations / Why the pig skin may appear misaligned
+
+Research finding (T6 revisit, from decompiled game source, verified against the shipped XNB assets):
+
+**What `OinkSkin.Apply` swaps** — two fields on the active `Blood.BloodnBacon` screen:
+- `player1Texture` and `player1TextureOrig` (`BloodnBacon.cs` field decl. ~lines 2572/2582). They are set per-frame to `Content.Load<Texture2D>("npc/piggy1")`.
+
+**Do those fields feed the visible model draw? Yes — through the blood-compositing path.**
+- The game never draws the local player's skin directly from a "model material texture". The visible skin is an `Effect` parameter on the skinned model shader:
+  - `executePlayer1Blood()` / `delPlayer1Blood()` (`BloodnBacon.cs:24752/24802`) draw `player1Texture` (+ wound sprites) into 600x600 render targets, then reassign `player1Texture = target1/target2` and set `quickSkin1.Parameters["Texture"] = player1Texture` (`BloodnBacon.cs:24784/24830`).
+  - `DrawMyChar()` (`BloodnBacon.cs:27636`) binds that effect to the visible model: `localModel.Meshes[0].MeshParts[0].Effect = quickSkin1; ... localModel.Meshes[0].Draw();`.
+- So swapping `player1Texture` **does** change what the visible player model renders. The pig skin shows — it just shows on the human UV layout.
+
+**Why parts look misaligned (the actual UV mismatch):** both the human skin `texture/jon6` and the pig skin `npc/piggy1` are 600x600 DXT1 atlases with 10 mip levels (verified from XNB headers; render targets are also 600x600). The human model's UVs map onto the human atlas layout, so sampling the pig atlas puts body regions in the wrong places (head picks up arm/torso pixels, etc.). It is a UV-layout mismatch, not a resolution/size mismatch and not an invisible swap.
+
+**Caveat:** `quickSkin1.Texture` is only refreshed inside `executePlayer1Blood`/`delPlayer1Blood`, which run only when the player has blood paint or is being cleaned. Until the player has been hit at least once, the model samples the last composited target (or an unset parameter at game start). Combat applies blood within seconds, so the swap is effectively visible in normal play.
+
+**Ranked options (by effort):**
+1. **(a) Texture-only via the correct field — already implemented.** The swapped fields are the only route to the visible model (via `quickSkin1.Texture`). There is no separate "visible model material texture" for Oink to touch. This gives a visible but UV-misaligned pig skin.
+2. **(c) Tint/recolor the human atlas instead of replacing it.** Keep the human UV layout, recolor `jon6`'s atlas (or a pre-baked pig-colored variant) and swap that in. Keeps rig, weapons, camera, and alignment; result is a pig-colored farmer rather than a true pig model. Medium effort (runtime DXT1 decode/re-encode, or ship a baked recolor with the mod).
+3. **(d) Accept as cosmetic limitation.** Documented above; disable `PigSkin` if the misalignment is unacceptable.
+4. **(b) Model swap (replaces `localModel` with the pig model) — infeasible.** The player rig path hardcodes farmer/human bone indices (`playerBones` writes `boneTransforms[15..28]`; `DrawMyChar` binds `npc1[myPlayer.clip1].skinTransforms`; camera/hand/weapon attachment use fixed indices). The pig skeleton (Bip01) does not match, so bones, hands, weapons, and camera would detach. Would require patching animation/bone/paint logic, not a texture change.

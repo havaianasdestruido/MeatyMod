@@ -28,7 +28,7 @@
 - `ChecksumTests.cs` — SHA-256 known answer + file.
 - `ManifestValidationTests.cs` — `ModManifest.Validate` / `LoadWithValidation`.
 
-**Untested (highest regression surface):** all `MeatyMod.Cli` commands, `AssemblyInjector.Patch`, `AssetValidator.ValidateDirectory`, `AssetManifestBuilder`, `BackupManager`, and positive LZX decompression.
+**Untested (highest regression surface):** most `MeatyMod.Cli` commands, `AssetValidator.ValidateDirectory`, `AssetManifestBuilder`, `BackupManager`, and positive LZX decompression. CLI inject/restore edge + negative cases now partly covered by `InjectEdgeTests` (13).
 
 ## Manual Verification Checklist (for the orchestrator)
 
@@ -70,7 +70,8 @@ Run in this order once all parallel edits land:
 
 - ~~`Program.cs:11-20` must register `ChecksumCommand`/`XnbCommand`~~ — DONE (commit `44653bc`).
 - ~~`XnbContentReaderTests.cs:11` absolute path~~ — resolved via relative fallback; real-file test guarded by full sweep.
-- Decide install-time `checksums.txt` verification (R3) — still open; pack-side format parity now tested.
+- R3 (install-time `checksums.txt` verification, `InstallCommand.cs`) — **IN PROGRESS** / still open (being addressed in the same batch). Pack-side format parity already tested.
+- R8 (`VerifyCommand.cs:37` empty-dir treated as success, `Valid 0 == Total 0`) — **IN PROGRESS** / still open (being addressed in the same batch). Not yet fixed in code.
 
 ## Rigorous-test follow-up (2026-08-06)
 
@@ -85,4 +86,14 @@ Full checklist executed against a staging copy of the game exe (game dir untouch
 | 5 | **legacy single-mod inject corrupted the mod DLL** (DLL parsed as output path → patched exe written over Oink.dll) | legacy branch rewritten; DLL no longer treated as output |
 
 Verification: 55/55 tests, SMOKE PASS, xnb sweep 1860/1159 compressed/0 failed, multi-mod IL probe shows both Inject calls in order, restore byte-identical.
+
+## Extreme-test follow-up (2026-08-07)
+
+1. **Patched-exe file audit PASS**: Oink AssemblyRef token `[AssemblyRef:0x000e]`; ctor tail exactly `ldarg.0; call Oink.OinkEntry::Inject; ret` (1 Inject MemberReference, 1 ret); deployed `Oink.dll` hash == source; real game exe pristine (hash `9A5D83...E77AD`); restore round-trip byte-exact.
+2. **Headless ModHarness** (`tools\modharness`, net10.0-windows x86): 18 PASS / 0 FAIL — loads Oink.dll + XNA via reflection (needs GAC `Microsoft.Xna.Framework.Input.Touch.dll`), constructs ShimGame, Inject executes, hook added with `UpdateOrder = int.MaxValue`, `oink.log` "Oink injected." written, `OinkHook.Update` runs without throw. Closes the "cannot prove mod code runs without launching the game" gap.
+3. **Process memory viewer** (`tools\memscan`): module enumeration + heap marker scan verified against a dummy target process.
+4. **13 new InjectEdgeTests added** (edge/negative injector + CLI regression), suite now 68/68.
+5. **New repo scripts**: `all.bat`, per-mod `build.bat`/`run.bat`.
+
+Open items: R3 (install-time `checksums.txt` verification) and R8 (`VerifyCommand` empty-dir failure) remain **IN PROGRESS / still open** — being addressed in the same batch; not yet resolved in code.
 

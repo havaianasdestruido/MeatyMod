@@ -1,7 +1,15 @@
 # Functional Testing Report
 
 ## Unit tests (dotnet test)
-- 55/55 pass. Coverage: XNB header/content/LZX, TxtReader/CameraTrack/Dialogue, RawReader, Core (FileSizeGuard, ModManifestLoader, ChecksumUtil), ManifestValidation (14), Injector Patch (single/multi/order/auto-detect/missing-entry), BackupManager, Pack/Install integration, pack exclusion + checksum-format parity.
+- 68/68 pass, 0 fail (observed via `dotnet test src\MeatyMod.Tests\MeatyMod.Tests.csproj`: 68 passed, 0 failed, total 68). Coverage: XNB header/content/LZX, TxtReader/CameraTrack/Dialogue, RawReader, Core (FileSizeGuard, ModManifestLoader, ChecksumUtil), ManifestValidation (14), Injector Patch (single/multi/order/auto-detect/missing-entry), BackupManager, Pack/Install integration, pack exclusion + checksum-format parity, plus 13 `InjectEdgeTests.cs` cases (missing exe/dll, array mismatch, missing myGame/ctor, empty mod list, legacy overload, in-place no-dll-corruption, InjectCommand_Legacy_DoesNotTreatDllAsOutput regression, multi-with-entry order, no/one-arg usage, RestoreCommand byte-identical).
+
+## Extreme testing (2026-08-07)
+- Patched-exe file audit:
+  - Oink `AssemblyRef` token `[AssemblyRef:0x000e]`; ctor tail `IL_062 ldarg.0 / IL_063 call Oink.OinkEntry::Inject / IL_064 ret` — exactly 1 Inject ref and 1 ret.
+  - Deployed `Oink.dll` SHA-256 matches source build; real game exe pristine; restore round-trip byte-exact.
+- Headless ModHarness (`tools\modharness`): loads Oink.dll + XNA by reflection, constructs a `ShimGame` subclass of `Microsoft.Xna.Framework.Game` headlessly, invokes `OinkEntry.Inject`, verifies `OinkHook` added with `UpdateOrder == int.MaxValue`, `oink.log` written, hook `Update` runs without throw — 18 checks PASS. Requires x86 `PlatformTarget` (XNA is x86-only).
+- Process memory viewer (`tools\memscan`): P/Invoke `OpenProcess`/`CreateToolhelp32Snapshot` + `Module32First/Next`, `VirtualQueryEx` + `ReadProcessMemory`; verified against a dummy target process (module found + heap marker found, UTF-16LE + UTF-8 scans).
+- 68/68 tests, 0 failures.
 
 ## Rigorous manual testing (staging copy, game untouched)
 - Build: `dotnet build src\MeatyMod.sln` — 0 errors.
