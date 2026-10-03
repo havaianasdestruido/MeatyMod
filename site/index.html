@@ -1,0 +1,240 @@
+---
+layout: default
+title: MeatyMod
+description: A C# mod suite and Mono.Cecil IL injector for Blood & Bacon — pack content mods, inject code mods, parse XNB/TXT/RAW assets, and restore the original executable in one command.
+body_class: home-body
+---
+
+<section class="hero">
+  <div class="wrap hero__grid">
+    <div>
+      <p class="eyebrow">Blood &amp; Bacon modding toolkit</p>
+      <h1>Butcher the<br><span class="accent">game binary.</span></h1>
+      <p class="lede">
+        MeatyMod packs content mods, rewrites the game executable with Mono.Cecil so your
+        .NET mod loads itself, decodes XNA's XNB, TXT and RAW assets, and puts the original
+        file back whenever you ask. Nine commands, one <code>.exe</code>, no launcher.
+      </p>
+
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="{{ site.docs_url | append: 'getting-started/quickstart' | relative_url }}">
+          Quickstart &rarr;
+        </a>
+        <a class="btn btn--ghost" href="{{ site.docs_url | relative_url }}">Read the docs</a>
+        <a class="btn btn--ghost" href="{{ site.repo_url }}" rel="noopener">GitHub</a>
+      </div>
+    </div>
+
+    <div class="hero__art">
+      <img src="{{ '/assets/img/logo.png' | relative_url }}" alt="MeatyMod logo" width="300" height="300">
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>Patch, play, undo</h2>
+      <p>Everything below runs against a normal Steam install. A backup is written before the first byte changes.</p>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal__bar">
+        <span class="terminal__dot"></span><span class="terminal__dot"></span><span class="terminal__dot"></span>
+        <span class="terminal__title">cmd.exe</span>
+      </div>
+<pre><span class="c">:: build the suite and both bundled mods</span>
+<span class="p">&gt;</span> all.bat
+
+<span class="c">:: inject a mod DLL into the game executable</span>
+<span class="p">&gt;</span> meatymod inject "game\Blood and Bacon\BloodandBacon.exe" ^
+      --mod mods\QuackMenu\src\QuackMenu\bin\Release\net40\QuackMenu.dll
+  Backup: game\Blood and Bacon\BloodandBacon.exe.backup
+  Injected: QuackMenu.QuackMenuEntry.Inject
+
+<span class="c">:: changed your mind?</span>
+<span class="p">&gt;</span> meatymod restore "game\Blood and Bacon\BloodandBacon.exe"
+  Restored from backup.</pre>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>What is in the box</h2>
+      <p>Seven projects, two reference mods, two diagnostic tools and 79 tests.</p>
+    </div>
+
+    <div class="grid grid--3">
+      <div class="card">
+        <h3>IL injection <span class="card__tag">Cecil</span></h3>
+        <p>
+          Two instructions appended to the game's <code>myGame</code> constructor hand your mod the
+          <code>Game</code> instance. The patched executable is self-contained — no loader process,
+          no runtime detour, no DLL hijack.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Asset formats <span class="card__tag">XNB</span></h3>
+        <p>
+          A full XNB container reader with an LZX decompressor, plus parsers for the game's
+          loose TXT assets, 16-bit RAW heightmaps, camera tracks and dialogue tables.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Safe installs <span class="card__tag">SHA-256</span></h3>
+        <p>
+          Packages carry a <code>checksums.txt</code> that is verified before anything is written.
+          Zip-slip paths are refused, oversized entries are skipped, overwritten files are backed up.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>One-command undo <span class="card__tag">restore</span></h3>
+        <p>
+          Every inject writes <code>&lt;exe&gt;.backup</code> first. <code>meatymod restore</code> copies it
+          back. Content installs mirror replaced files into <code>Backups\MeatyMod\</code>.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Headless proof <span class="card__tag">harness</span></h3>
+        <p>
+          <code>ModHarness</code> builds a shim XNA game, runs your mod's <code>Inject</code> and checks
+          eighteen invariants — so you know the mod works before you launch anything.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Live verification <span class="card__tag">memscan</span></h3>
+        <p>
+          A read-only Win32 scanner that confirms your module is loaded in the running game
+          and that its marker strings are resident. It never writes to the process.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>Two mods ship with it</h2>
+      <p>Both are complete, documented reference implementations of the hook pattern — copy either one to start your own.</p>
+    </div>
+
+    <div class="grid grid--2">
+      <div class="card card--mod">
+        <h3>QuackMenu <span class="card__tag">creative</span></h3>
+        <p>
+          An in-game boss spawner and creative-mode toggle. Opens an overlay listing four bosses,
+          constructs the right one by reflecting over its constructor, and registers it with the
+          game's screen manager.
+        </p>
+        <p class="card__keys"><kbd>F1</kbd> menu &nbsp; <kbd>↑</kbd><kbd>↓</kbd> select &nbsp; <kbd>Enter</kbd> spawn &nbsp; <kbd>Esc</kbd> close</p>
+        <p class="card__keys"><a href="{{ site.docs_url | append: 'mods/quackmenu' | relative_url }}">Read the QuackMenu docs &rarr;</a></p>
+      </div>
+
+      <div class="card card--mod">
+        <h3>Oink <span class="card__tag">cosmetic</span></h3>
+        <p>
+          Swaps the player texture for a pig skin and multiplies sprint speed. Stashes the original
+          texture reference so it can be restored at runtime, and documents exactly why the
+          borrowed UV layout does not line up.
+        </p>
+        <p class="card__keys"><kbd>O</kbd> toggle</p>
+        <p class="card__keys"><a href="{{ site.docs_url | append: 'mods/oink' | relative_url }}">Read the Oink docs &rarr;</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <h2>The command line</h2>
+      <p>One executable, nine commands. Full syntax, exit codes and examples live in the <a href="{{ site.docs_url | append: 'cli/overview' | relative_url }}">CLI reference</a>.</p>
+    </div>
+
+    <div class="table-scroll">
+      <table class="cmds">
+        <thead>
+          <tr><th>Command</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>pack</td><td>Zip a mod folder with a SHA-256 manifest, skipping build output.</td></tr>
+          <tr><td>install</td><td>Verify checksums, then extract into the game's <code>Content</code> with backups.</td></tr>
+          <tr><td>inject</td><td>Patch the game executable so one or more mod DLLs are invoked.</td></tr>
+          <tr><td>restore</td><td>Copy the <code>.backup</code> executable back over the patched one.</td></tr>
+          <tr><td>manifest</td><td>Build a JSON index of every asset in a content directory.</td></tr>
+          <tr><td>verify</td><td>Validate XNB headers across a file or tree; non-zero on failure.</td></tr>
+          <tr><td>parse</td><td>Dump a TXT, camera-track or RAW heightmap asset as text.</td></tr>
+          <tr><td>xnb</td><td>Report header details and compression for XNB files.</td></tr>
+          <tr><td>checksum</td><td>Print sorted SHA-256 hashes for a file or directory.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap wrap--narrow">
+    <div class="section__head">
+      <h2>Get it running</h2>
+      <p>You need the .NET 10 SDK, a Windows copy of Blood &amp; Bacon, and about three minutes.</p>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <h3>Clone and build</h3>
+        <p>One script builds the suite, both mods and both tools in Release.</p>
+        <pre>git clone {{ site.repo_url }}.git
+cd MeatyMod
+all.bat</pre>
+      </li>
+      <li>
+        <h3>Point at the game</h3>
+        <p>The scripts expect the install at <code>game\Blood and Bacon\</code>. A junction works.</p>
+        <pre>mklink /J "game\Blood and Bacon" ^
+  "C:\Program Files (x86)\Steam\steamapps\common\Blood and Bacon"</pre>
+      </li>
+      <li>
+        <h3>Launch a mod</h3>
+        <p>Each launcher restores, injects and starts the game in one go.</p>
+        <pre>mods\launch\launch-quackmenu.bat</pre>
+      </li>
+    </ol>
+
+    <div class="callout callout--warn" style="margin-top: 26px;">
+      <h3>Injected code is not sandboxed</h3>
+      <p>
+        A mod DLL runs inside the game process with your full user rights. MeatyMod does not
+        scan, sign or restrict it. Only inject mods you built or whose source you have read —
+        the <a href="{{ site.docs_url | append: 'architecture/security-model' | relative_url }}">security model</a>
+        spells out exactly which guarantees exist and which do not.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--flat">
+  <div class="wrap">
+    <div class="grid grid--3">
+      <div class="card">
+        <h3>New here?</h3>
+        <p><a href="{{ site.docs_url | append: 'getting-started/installation' | relative_url }}">Installation</a> walks through prerequisites and the first build.</p>
+      </div>
+      <div class="card">
+        <h3>Writing a mod?</h3>
+        <p><a href="{{ site.docs_url | append: 'mods/authoring-a-mod' | relative_url }}">Authoring a mod</a> takes you from empty folder to injected DLL.</p>
+      </div>
+      <div class="card">
+        <h3>Digging deeper?</h3>
+        <p><a href="{{ site.docs_url | append: 'api/overview' | relative_url }}">API reference</a> documents every public type across the seven projects.</p>
+      </div>
+    </div>
+  </div>
+</section>

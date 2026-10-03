@@ -1,0 +1,111 @@
+name: Documentation site
+
+# Builds the combined site and publishes it to GitHub Pages:
+#
+#   site/   -> Jekyll   -> _site/        (https://havaianasdestruido.github.io/MeatyMod/)
+#   docs/   -> Docusaurus -> _site/docs/ (https://havaianasdestruido.github.io/MeatyMod/docs/)
+#
+# Pull requests run the build job only, so a broken link or a Liquid error is
+# caught before merge. Deployment happens on pushes to main.
+#
+# One-time setup: repository Settings -> Pages -> Build and deployment ->
+# Source must be set to "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two Pages deployments race; let a newer push supersede a queued one,
+# but do not cancel a deployment that is already running.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Jekyll + Docusaurus
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          # Docusaurus reads git history to render "last updated" timestamps.
+          fetch-depth: 0
+
+      # ---------------------------------------------------------------- Jekyll
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: site
+
+      - name: Build the Jekyll site
+        working-directory: site
+        env:
+          JEKYLL_ENV: production
+        run: bundle exec jekyll build --destination "${GITHUB_WORKSPACE}/_site" --trace
+
+      # ------------------------------------------------------------ Docusaurus
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install documentation dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build the Docusaurus documentation
+        working-directory: docs
+        run: npm run build
+
+      - name: Merge the documentation into the site output
+        run: |
+          rm -rf "${GITHUB_WORKSPACE}/_site/docs"
+          mkdir -p "${GITHUB_WORKSPACE}/_site/docs"
+          cp -r docs/build/. "${GITHUB_WORKSPACE}/_site/docs/"
+
+      - name: Sanity-check the combined output
+        run: |
+          test -f _site/index.html         || { echo "::error::Jekyll produced no index.html"; exit 1; }
+          test -f _site/docs/index.html    || { echo "::error::Docusaurus produced no docs/index.html"; exit 1; }
+          test -f _site/assets/css/main.css || { echo "::error::site stylesheet is missing"; exit 1; }
+          echo "Combined site:"
+          find _site -maxdepth 2 -type d | sort | head -40
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    # Only publish from the default branch; pull requests stop after build.
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

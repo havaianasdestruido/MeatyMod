@@ -2,6 +2,10 @@
 
 MeatyMod is a C# .NET mod suite for Blood & Bacon. It packs content mods, injects .NET mod DLLs into the game executable via Mono.Cecil IL patching, parses the game's XNB/TXT/RAW asset formats, and verifies/restores installs. Ships two example mods (QuackMenu, Oink), both targeting .NET 4.0 / XNA 4.0.
 
+**📖 Documentation: <https://havaianasdestruido.github.io/MeatyMod/>** — [quickstart](https://havaianasdestruido.github.io/MeatyMod/docs/getting-started/quickstart), [CLI reference](https://havaianasdestruido.github.io/MeatyMod/docs/cli/overview), [API reference](https://havaianasdestruido.github.io/MeatyMod/docs/api/overview), [authoring a mod](https://havaianasdestruido.github.io/MeatyMod/docs/mods/authoring-a-mod), [troubleshooting](https://havaianasdestruido.github.io/MeatyMod/docs/reference/troubleshooting).
+
+The site itself lives in this repository: `site/` is the Jekyll landing page, `docs/` is the Docusaurus documentation served at `/docs`, and `.github/workflows/docs.yml` builds and deploys both to GitHub Pages. See [Documentation site](https://havaianasdestruido.github.io/MeatyMod/docs/development/documentation-site) to run either one locally.
+
 ## TL:DR
 
 This is a WIP modding framework that injects custom mods .DLL into the games executable, then it makes an Frankenstein-ish binary that call the custom mod code you selected.

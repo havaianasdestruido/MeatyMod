@@ -1,0 +1,190 @@
+/**
+ * MeatyMod docs theme.
+ * Matches the Jekyll marketing site at /MeatyMod/ : bone-white type, charred
+ * backgrounds, blood-red accents.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --mm-red: #c3122f;
+  --mm-red-bright: #e2213f;
+  --mm-red-dark: #8e0c22;
+  --mm-bone: #f4ece4;
+  --mm-char: #0e0b0c;
+
+  --ifm-color-primary: #b01029;
+  --ifm-color-primary-dark: #9e0e25;
+  --ifm-color-primary-darker: #950e23;
+  --ifm-color-primary-darkest: #7b0b1d;
+  --ifm-color-primary-light: #c2122d;
+  --ifm-color-primary-lighter: #cb132f;
+  --ifm-color-primary-lightest: #e41836;
+
+  --ifm-font-family-base: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto,
+    sans-serif;
+  --ifm-font-family-monospace: 'IBM Plex Mono', ui-monospace, SFMono-Regular,
+    Menlo, Consolas, monospace;
+
+  --ifm-code-font-size: 92%;
+  --ifm-heading-font-weight: 700;
+  --ifm-navbar-height: 4rem;
+  --docusaurus-highlighted-code-line-bg: rgba(195, 18, 47, 0.12);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #ff4d6a;
+  --ifm-color-primary-dark: #ff2b4f;
+  --ifm-color-primary-darker: #ff1941;
+  --ifm-color-primary-darkest: #db0028;
+  --ifm-color-primary-light: #ff6f85;
+  --ifm-color-primary-lighter: #ff8193;
+  --ifm-color-primary-lightest: #ffb6c1;
+
+  --ifm-background-color: #0e0b0c;
+  --ifm-background-surface-color: #161113;
+  --ifm-navbar-background-color: rgba(14, 11, 12, 0.92);
+  --ifm-footer-background-color: #0a0809;
+  --ifm-font-color-base: #e9e1da;
+  --ifm-heading-color: #fdf7f1;
+  --ifm-toc-border-color: #2a1f22;
+  --ifm-table-stripe-background: rgba(255, 255, 255, 0.025);
+  --docusaurus-highlighted-code-line-bg: rgba(255, 77, 106, 0.16);
+}
+
+/* ---------- chrome ---------- */
+
+.navbar {
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  box-shadow: none;
+}
+
+[data-theme='light'] .navbar {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+.navbar__title {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.navbar__logo img {
+  border-radius: 6px;
+}
+
+.navbar__brand::after {
+  content: 'docs';
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: 4px;
+  color: var(--ifm-color-primary);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.footer--dark {
+  --ifm-footer-background-color: #0a0809;
+  border-top: 1px solid #2a1f22;
+}
+
+/* ---------- content ---------- */
+
+.markdown h1:first-child {
+  font-size: 2.4rem;
+  letter-spacing: -0.025em;
+}
+
+.markdown h2 {
+  margin-top: 2.4rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  font-size: 1.6rem;
+  letter-spacing: -0.015em;
+}
+
+.markdown h3 {
+  margin-top: 1.8rem;
+  font-size: 1.22rem;
+}
+
+.markdown table {
+  display: table;
+  width: 100%;
+  font-size: 0.92rem;
+}
+
+.markdown table th {
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.markdown table code {
+  white-space: nowrap;
+}
+
+.theme-doc-markdown code {
+  border-radius: 4px;
+}
+
+/* API member blocks: a `###` signature reads better monospaced. */
+.markdown h3 code,
+.markdown h4 code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+blockquote {
+  border-left: 3px solid var(--ifm-color-primary);
+}
+
+.pagination-nav__link {
+  border-color: var(--ifm-toc-border-color);
+}
+
+/* Breadcrumbs home icon inherits the accent. */
+.breadcrumbs__link {
+  font-size: 0.85rem;
+}
+
+/* Mermaid diagrams get a card treatment so they do not float on the page. */
+.docusaurus-mermaid-container {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 10px;
+  background: var(--ifm-background-surface-color);
+  text-align: center;
+}
+
+/* ---------- small helpers usable from MDX ---------- */
+
+.mm-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mm-badge {
+  padding: 0.18rem 0.55rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 999px;
+  background: var(--ifm-background-surface-color);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.72rem;
+}
+
+.mm-badge--accent {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+}
