@@ -186,6 +186,9 @@ p { margin: 0 0 1.1em; }
 
 .site-nav__link--ghost { border: 1px solid var(--line); }
 
+/* No disclosure UI on wide viewports: the full nav is already visible, so the
+   checkbox must not be a focus stop either. The narrow-viewport rules below
+   bring it back as a visually hidden but focusable control. */
 .nav-toggle,
 .nav-burger { display: none; }
 
@@ -677,6 +680,22 @@ kbd {
 }
 
 @media (max-width: 680px) {
+  /* Visually hidden, but still rendered, focusable and operable by keyboard.
+     `display: none` would take it out of the accessibility tree entirely and
+     leave the menu mouse-only. */
+  .nav-toggle {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+  }
+
   .nav-burger {
     display: flex;
     flex-direction: column;
@@ -689,6 +708,12 @@ kbd {
     border: 1px solid var(--line);
     border-radius: 8px;
     cursor: pointer;
+  }
+
+  /* The checkbox is invisible, so its focus ring has to appear on the label. */
+  .nav-toggle:focus-visible + .nav-burger {
+    outline: 2px solid var(--red-bright);
+    outline-offset: 2px;
   }
 
   .nav-burger span {

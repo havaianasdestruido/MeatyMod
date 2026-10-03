@@ -41,9 +41,9 @@ Install complete.
      checksum mismatch: config.txt (expected 9ab0…, got 1f3c…)
    ```
 
-   Reported problems: hash mismatch, a listed file missing from the archive, and `checksums.txt: malformed line: "…"`. If the archive has **no** `checksums.txt`, verification is skipped entirely.
+   Reported problems: hash mismatch, a listed file missing from the archive, and `checksums.txt: malformed line: "…"`. Only the paths **listed** in `checksums.txt` are hashed, so an archive with no `checksums.txt` installs unverified, and entries the list omits are extracted unchecked. See [mod package](../formats/mod-package.md#how-install-uses-it).
 3. **Extracts each entry**, skipping directory entries, and for each file:
-   - **containment check** — `Path.GetFullPath(Path.Combine(contentRoot, entry.FullName))` must stay inside `contentRoot`, otherwise `Skipping unsafe entry: <name>`;
+   - **containment check** — `Path.GetFullPath(Path.Combine(contentRoot, entry.FullName))` must stay inside `contentRoot`, otherwise `Skipping unsafe entry: <name>`. This is a string comparison (`OrdinalIgnoreCase`, correct for NTFS): it blocks `..\` traversal and absolute paths, but does not follow symlinks or junctions, and on a case-sensitive filesystem a case-only sibling of the content root would pass. See the [security model](../architecture/security-model.md#path-containment-on-install-zip-slip);
    - **size check** — `entry.Length` must pass `FileSizeGuard.IsAllowed`, otherwise `Skipping oversized entry: <name>`;
    - **backup** — if the target already exists it is copied to `Backups\MeatyMod\<relative path>` and `Backed up <path>` is printed;
    - **write** — the entry stream is copied to the target with `FileMode.Create`.

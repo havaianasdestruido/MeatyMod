@@ -44,7 +44,9 @@ Manifest written to assets.json
 }
 ```
 
-Serialization uses `JsonSerializer` with `WriteIndented = true`, so paths are JSON-escaped (doubled backslashes on Windows) and absolute as enumerated.
+Serialization uses `JsonSerializer` with `WriteIndented = true`, so paths are JSON-escaped (doubled backslashes on Windows).
+
+Values keep whatever form `Directory.EnumerateFiles` returned, which follows the directory argument: `ManifestCommand.Run` passes `args[0]` to `AssetManifestBuilder.Build` without normalising it, so an absolute `<content-dir>` yields absolute paths and a relative one yields paths relative to the current directory. Pass an absolute path if you need absolute output.
 
 ## Semantics
 

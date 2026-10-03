@@ -2,12 +2,18 @@
 id: memscan
 title: memscan
 sidebar_label: memscan
-description: Read-only process memory viewer that proves a mod DLL loaded and executed in the live game.
+description: Read-only process memory scanner that checks a mod DLL is loaded and its marker string is resident in the live game.
 ---
 
 # memscan
 
-`tools\memscan` is a small read-only Windows console tool that verifies, **at runtime**, that a modded game process actually loaded the mod DLL and that the mod's marker string is present in the process heap — i.e. that the mod code executed.
+`tools\memscan` is a small read-only Windows console tool that checks, **at runtime**, two things about a modded game process: that it has the mod DLL loaded as a module, and that the mod's marker string is present somewhere in its readable memory.
+
+It walks the whole address space with `VirtualQueryEx`, reading every committed readable region — not just the heap — and searches each one for the marker encoded as both UTF-16LE and UTF-8.
+
+:::caution What a hit does and does not prove
+A module match plus a marker hit is strong evidence the mod is loaded and wired up, but it is **not** proof that the mod's code ran. The marker is a plain string: it can be resident because it was baked into the DLL image, read out of a config file, or left over in freed memory. Treat memscan as corroboration, and use the mod's own log line or [ModHarness](./modharness.md) when you need to know that `Inject` actually executed.
+:::
 
 `meatymod inject` patches the executable on disk; `memscan` is the complementary check against the running process.
 

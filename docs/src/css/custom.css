@@ -4,7 +4,9 @@
  * backgrounds, blood-red accents.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
+/* Inter and IBM Plex Mono are loaded from docusaurus.config.ts `headTags`,
+   not with an @import here — see the comment there. The stacks below fall
+   back to system fonts if those requests are blocked. */
 
 :root {
   --mm-red: #c3122f;

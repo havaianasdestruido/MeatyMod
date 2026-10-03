@@ -42,6 +42,15 @@ if (!IsInside(contentRoot, targetPath))
 
 `IsInside` compares against `contentRoot` plus a trailing separator (case-insensitively), so `..\..\Windows\System32\x.dll` and absolute paths are both skipped rather than written. Unsafe entries are skipped individually; the rest of the install continues.
 
+:::caution This is a lexical check only
+`Path.GetFullPath` normalises a path **as a string**. It collapses `..`, `.` and mixed separators; it does not ask the filesystem anything. So the guard stops the classic zip-slip entry and nothing more:
+
+- **Reparse points are not followed.** If `Content\` — or any directory beneath it — is a symlink, junction or mount point, the resolved path still looks like it is inside the root, and the write lands wherever the link points. Nothing calls `File.ResolveLinkTarget` or checks `FileAttributes.ReparsePoint`.
+- **The comparison is `OrdinalIgnoreCase` regardless of the filesystem.** That matches NTFS, the only platform the game runs on. On a case-sensitive filesystem it is too permissive: with a content root of `…/Game/Content`, an entry resolving into a genuinely different sibling directory `…/Game/content` compares equal and is accepted.
+
+Both gaps are known and untracked by tests. On the supported Windows target the practical exposure is small, but do not read this guard as a sandbox — the mod DLL you inject has your full user rights anyway.
+:::
+
 ### Path containment on backup
 
 `BackupManager.ResolveBackupPath` applies the same idea in reverse and throws instead of skipping:
@@ -52,6 +61,8 @@ if (!destPath.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase))
     throw new ArgumentException($"Path resolves outside backup root: {relativePath}");
 }
 ```
+
+The same two caveats apply: it is a string comparison, case-insensitive on every platform, and blind to reparse points.
 
 ### Integrity verification on install
 

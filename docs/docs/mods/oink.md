@@ -54,7 +54,7 @@ PigTexture=npc/piggy1
 
 | Key | Default | Effect |
 | --- | --- | --- |
-| `Enabled` | `true` | applied at inject time |
+| `Enabled` | `true` | read by `Inject`, but setting it to `false` does **not** disable the mod — `_enabled` starts `true` and `Inject` only ever assigns `true`. Use the toggle key ([details](../formats/mod-config.md#keys-that-are-read-but-have-no-effect)) |
 | `PigSkin` | `true` | enable the texture swap |
 | `SpeedMultiplier` | `1.35` | per-frame multiplier on `sprint`; `<= 0` or `1` disables |
 | `ToggleKey` | `O` | any `Keys` enum name, case-insensitive |

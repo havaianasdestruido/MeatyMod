@@ -117,7 +117,7 @@ a package by hand.
 | `0` | Success. |
 | `1` | Usage error, unknown command, or a command-specific failure. |
 
-Commands that fail print a single-line reason to standard output before returning `1`.
+A command-specific failure prints its reason to **standard error** before returning `1`. Most are one line; a failed integrity check prints a header followed by one line per mismatch.
 
 ---
 

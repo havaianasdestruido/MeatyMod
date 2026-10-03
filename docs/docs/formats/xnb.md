@@ -33,8 +33,16 @@ Three readers with different cost/strictness trade-offs:
 | `XnbReader.ReadHeader` | 5 bytes | any `XNB` | trivial |
 | `XnbContentReader.Read` | whole file | `XNB` + version `4` or `5`, any platform | full decompression |
 
-:::caution `XnbReader` offsets are off by one field
-`XnbReader.ReadHeader` reads magic → `Version` → `Flags`, skipping the platform byte, so its `Version` property actually holds the platform byte. It is kept for the cheap "is this XNB" probe; use `XnbContentReader` whenever the values matter. See the [API note](../api/meatymod-formats.md#xnbreader).
+:::caution `XnbReader` field names are off by one
+`XnbReader.ReadHeader` reads the 3 magic chars and then two more bytes, assigning them to `Version` and `Flags` in that order. No byte is skipped — the names are simply shifted against the real layout:
+
+| Property | Byte | What it actually holds |
+| --- | --- | --- |
+| `Magic` | 0–2 | `XNB` |
+| `Version` | 3 | the **platform** byte (`w` / `x` / `m`) |
+| `Flags` | 4 | the **XNB format version** byte (`4` or `5`) |
+
+The real flags byte (bit `0x80` = LZX) is never read by `XnbReader`. It is kept for the cheap "is this XNB" probe; use `XnbContentReader` whenever the values matter. See the [API note](../api/meatymod-formats.md#xnbreader).
 :::
 
 ## LZX decompression

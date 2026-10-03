@@ -8,8 +8,11 @@
       <span class="brand__ver">v{{ site.version }}</span>
     </a>
 
-    <input class="nav-toggle" id="nav-toggle" type="checkbox" aria-hidden="true">
-    <label class="nav-burger" for="nav-toggle" aria-label="Toggle navigation">
+    <!-- Real checkbox: reachable by keyboard on narrow viewports, where the
+         adjacent label is the visible burger. Hidden outright on wide ones,
+         because the full nav is already on screen. -->
+    <input class="nav-toggle" id="nav-toggle" type="checkbox" aria-label="Toggle navigation">
+    <label class="nav-burger" for="nav-toggle">
       <span></span><span></span><span></span>
     </label>
 

@@ -109,7 +109,7 @@ Bosses=Cutty,Princess,BoarKing,Twin
 | `FlatWorld` | `true` | force day 1 + `spawnY` |
 | `SpawnHeight` | `3` | the `spawnY` value |
 | `OpenMenuKey` | `F1` | any `Microsoft.Xna.Framework.Input.Keys` name, case-insensitive |
-| `Bosses` | `Cutty,Princess,BoarKing,Twin` | comma-separated catalog filter |
+| `Bosses` | `Cutty,Princess,BoarKing,Twin` | intended as a catalog filter; **parsed but unused** (below) |
 
 :::caution Two config keys are currently inert
 `BossCatalog.Enabled(config)` exists and correctly filters the catalog by the `Bosses` list, but `BossMenuScreen` initialises its list from `BossCatalog.All` — so the menu always shows all four. `BossWeights` is parsed into `QuackConfig.BossWeights` and never read; weights come from the hard-coded catalog. Both are good first contributions.

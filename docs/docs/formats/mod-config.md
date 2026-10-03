@@ -64,7 +64,7 @@ Because the file is read at startup from the game folder, you can tweak values a
 
 | Key | Default | Type | Meaning |
 | --- | --- | --- | --- |
-| `Enabled` | `true` | bool | master switch applied at inject time |
+| `Enabled` | `true` | bool | intended as the initial enabled state, read by `OinkEntry.Inject` inside the game. **Currently cannot disable the mod** — see below |
 | `PigSkin` | `true` | bool | swap the player skin texture |
 | `SpeedMultiplier` | `1.35` | float | multiplies the player's `sprint` field each frame; `<= 0` or exactly `1` disables the effect |
 | `ToggleKey` | `O` | `Keys` enum name | in-game toggle, parsed case-insensitively |
@@ -78,9 +78,22 @@ Because the file is read at startup from the game folder, you can tweak values a
 | `FlatWorld` | `true` | bool | forces day 1 and a fixed spawn height |
 | `SpawnHeight` | `3` | float | value written to the screen manager's `spawnY` |
 | `OpenMenuKey` | `F1` | `Keys` enum name | opens the boss menu |
-| `Bosses` | `Cutty,Princess,BoarKing,Twin` | comma list | filters the boss catalog by name |
+| `Bosses` | `Cutty,Princess,BoarKing,Twin` | comma list | **parsed but unused** — see below |
+| `BossWeights` | `0,1,2,3` | comma list | **parsed but unused** — see below |
 
 Key names in the file do not always match the C# field: `CreativeMode` maps to `QuackConfig.CreativeModeEnabled`.
+
+## Keys that are read but have no effect
+
+These are parsed into their config objects and then never acted on. They are documented here so you do not spend an evening wondering why nothing changed.
+
+| Key | Mod | Why it does nothing |
+| --- | --- | --- |
+| `Enabled` | Oink | `OinkEntry._enabled` is initialised to `true`, and `Inject` only ever assigns `true` to it (`if (_screenManager != null && ParseBool(_config.Enabled, true)) { _enabled = true; }`). A configured `false` therefore leaves the mod enabled. Use the toggle key in game. |
+| `Bosses` | QuackMenu | Parsed into `QuackConfig.Bosses` and consumed only by `BossCatalog.Enabled(config)`, which nothing calls. `BossMenuScreen` assigns `_bosses = BossCatalog.All`, so the menu always lists all four bosses. |
+| `BossWeights` | QuackMenu | Parsed into `QuackConfig.BossWeights` and never read. Spawn weight comes from the hard-coded `Weight` on each `BossDefinition`. |
+
+Wiring these up is a good first contribution — see [Contributing](../development/contributing.md).
 
 ## Key names
 

@@ -79,7 +79,7 @@ backups.RestoreFile(@"game\Blood and Bacon\Content\day1.txt");
 Behaviour that matters:
 
 - Paths are mirrored **relative to `Directory.GetCurrentDirectory()`**, not to the file's own root. Change the working directory between backup and restore and the mapping changes with it.
-- `ResolveBackupPath` rejects anything that escapes the backup root with `ArgumentException("Path resolves outside backup root: …")` — a `..\..\` relative path cannot write outside the root.
+- `ResolveBackupPath` rejects anything that escapes the backup root with `ArgumentException("Path resolves outside backup root: …")` — a `..\..\` relative path cannot write outside the root. The test is lexical: `Path.GetFullPath` plus an `OrdinalIgnoreCase` prefix comparison, which is correct on NTFS but does not follow symlinks or junctions, and on a case-sensitive filesystem would also accept a case-only sibling of the root. See the [security model](./security-model.md#path-containment-on-install-zip-slip).
 - Backing up or restoring the working directory itself throws `ArgumentException`.
 - Destination directories are created automatically; the source is opened `FileShare.Read` and the destination `FileShare.None`.
 

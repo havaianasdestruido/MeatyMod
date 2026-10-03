@@ -57,7 +57,14 @@ Written as UTF-8 **without** a BOM. It does not contain an entry for itself. The
 3. Hash the entry stream and compare case-insensitively — mismatch ⇒ `checksum mismatch: <path> (expected …, got …)`.
 4. Any error at all aborts the install **before** a single file is written.
 
-An archive with **no** `checksums.txt` installs with no verification whatsoever.
+:::caution Verification only covers what the file lists
+`VerifyChecksums` iterates the **entries named in `checksums.txt`**, never the entries in the archive. Two consequences:
+
+- an archive with **no** `checksums.txt` installs with no verification whatsoever — `VerifyChecksums` returns an empty error list and the install proceeds;
+- an archive whose `checksums.txt` omits some files installs those files **unverified**. Nothing cross-checks that every zip entry is listed.
+
+`pack` always writes a complete list, so this only bites on hand-made or edited archives.
+:::
 
 :::caution Integrity, not authenticity
 The list lives inside the archive it describes. It catches truncation, corruption and accidental edits; it does not catch an attacker who repacks the zip and recomputes the hashes. There is no signing, and MeatyMod will not add one. See the [security model](../architecture/security-model.md).
@@ -65,7 +72,12 @@ The list lives inside the archive it describes. It catches truncation, corruptio
 
 ## Content mods vs code mods
 
-Because `pack` excludes `bin\`, **the compiled DLL is not in the archive**. That is deliberate — the two distribution paths are separate:
+`pack` skips any path whose segments include `bin` or `obj` (case-insensitive) or begin with a dot. It has no rule about file **extensions**, so what gets excluded depends on where a file sits, not on what it is:
+
+- a DLL built to `src\MyMod\bin\Release\net40\MyMod.dll` is **excluded**, because of the `bin` segment — which is where every mod in this repository builds to, so in practice the compiled mod is not in the archive;
+- a DLL sitting anywhere else — `MyMod\Mod.dll`, say — is **included** like any other file. The `PackAndInstall_RoundsTripToGameContent` test relies on exactly that: it writes `Mod.dll` at the mod root and asserts it arrives at `Content\Mod.dll`.
+
+Keeping build output out of the archive is deliberate — the two distribution paths are separate:
 
 | Mod kind | Ships | Installed with |
 | --- | --- | --- |

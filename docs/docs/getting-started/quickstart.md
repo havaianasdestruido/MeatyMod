@@ -21,15 +21,19 @@ all.bat
 
 ## 2. Pack a mod (optional, for content mods)
 
-`pack` zips a mod directory and embeds a `checksums.txt` manifest of every packed file.
+`pack` zips a mod directory and embeds a `checksums.txt` manifest of every packed file. Point it at a directory holding the files you want under `Content\` — replacement assets, tuning `.txt` files, a `manifest.json`:
 
 ```bat
-meatymod pack mods\QuackMenu
+meatymod pack mods\MyTextures
 ```
 
 ```text
-Packed mods\QuackMenu -> C:\…\MeatyMod\mod.zip
+Packed mods\MyTextures -> C:\…\MeatyMod\mod.zip
 ```
+
+:::note Not for code mods
+Don't point `pack` at `mods\QuackMenu` or `mods\Oink` expecting an installable mod. Their DLLs build to `bin\`, which `pack` skips, so you would get an archive of source files. Code mods are deployed by [`inject`](../cli/inject.md) in step 4.
+:::
 
 `bin`, `obj` and any dot-prefixed path segment are skipped, and files over 100 MB are reported and left out. See [`pack`](../cli/pack.md) and the [mod package format](../formats/mod-package.md).
 

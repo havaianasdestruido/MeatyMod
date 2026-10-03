@@ -25,10 +25,9 @@ on:
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
+# Least privilege by default: only the deploy job gets the Pages write scopes.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Never let two Pages deployments race; let a newer push supersede a queued one,
 # but do not cancel a deployment that is already running.
@@ -46,6 +45,8 @@ jobs:
         with:
           # Docusaurus reads git history to render "last updated" timestamps.
           fetch-depth: 0
+          # Nothing here pushes; do not leave a token in .git/config.
+          persist-credentials: false
 
       # ---------------------------------------------------------------- Jekyll
       - name: Set up Ruby
@@ -102,6 +103,10 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

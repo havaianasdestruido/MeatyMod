@@ -105,8 +105,11 @@ meatymod pack mods\MyTextures mytextures.zip
 meatymod install mytextures.zip "game\Blood and Bacon"
 ```
 
-`install` verifies the embedded `checksums.txt` before writing anything, refuses entries that
-would escape `Content\`, and backs up every file it replaces.
+When the archive contains a `checksums.txt`, `install` verifies every path it lists before
+writing anything, and aborts on the first mismatch. An archive **without** that file installs
+with no integrity verification at all, and files the list omits are extracted unchecked —
+`pack` always writes a complete list, so this only affects hand-made archives. Entries that
+would escape `Content\` are refused either way, and every replaced file is backed up.
 
 ## If something goes wrong
 

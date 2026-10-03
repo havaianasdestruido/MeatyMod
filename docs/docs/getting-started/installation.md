@@ -20,7 +20,15 @@ description: Prerequisites, repository checkout and building the MeatyMod CLI an
 
 :::note The `game\` folder
 
-Scripts resolve the game at `game\Blood and Bacon\BloodandBacon.exe`, relative to the repository root. Copy (or junction) your installed game there. The folder is git-ignored and must be treated as read-only input — the only file MeatyMod ever rewrites inside it is the executable you explicitly point `inject` at.
+Scripts resolve the game at `game\Blood and Bacon\BloodandBacon.exe`, relative to the repository root. Copy (or junction) your installed game there. The folder is git-ignored, but it is a **working copy, not read-only input** — MeatyMod writes into it:
+
+| Command | Writes |
+| --- | --- |
+| `inject` | the patched executable, `<exe>.backup`, each mod DLL next to the executable, and each mod's config to both `<outputDir>\<Mod>.txt` and `<outputDir>\Content\<Mod>\config.txt` |
+| `install` | extracted entries under `Content\`, plus a copy of every replaced file under `Backups\MeatyMod\` |
+| the mods themselves | `oink.log` / `quackmenu.log` next to the executable, at runtime |
+
+Everything above is reversible — see [Backup and restore](../architecture/backup-and-restore.md) — but if you would rather not touch your Steam install at all, copy the folder instead of junctioning it.
 
 ```bat
 mklink /J "game\Blood and Bacon" "C:\Program Files (x86)\Steam\steamapps\common\Blood and Bacon"

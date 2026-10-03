@@ -86,7 +86,7 @@ meatymod install mod.zip "game\Blood and Bacon"
 
 - keep the line **count and order** identical unless you know the loader tolerates more;
 - use `.` as the decimal separator — parsing is `CultureInfo.InvariantCulture`;
-- do not add comments; there is no comment syntax, and an unparsable line shifts nothing but will read as `0`;
+- do not add comments; there is no comment syntax. `TxtReader` drops only blank lines, so a `# note` line is kept as a normal entry: it takes an index of its own and **pushes every later field down by one**. A typed getter will return its default (`0`) for the comment's own position, but the real damage is the shift — everything after it is read from the wrong line;
 - re-run `meatymod parse` on the edited file to confirm it still reads the way you expect.
 
 :::tip Mod config files are a different thing

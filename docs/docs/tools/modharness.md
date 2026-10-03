@@ -7,7 +7,7 @@ description: Headless proof that an injected mod's Inject code executes, without
 
 # ModHarness
 
-`tools\modharness` proves that `Oink.OinkEntry.Inject()` really executes and really installs its hook — **without launching the game**.
+`tools\modharness` proves that `Oink.OinkEntry.Inject(Game)` really executes and really installs its hook — **without launching the game**.
 
 It loads `Oink.dll` plus the XNA assemblies by reflection, builds a dynamic `ShimGame` subclass of `Microsoft.Xna.Framework.Game`, invokes `Inject`, and then verifies that the hook was installed and runs. The game executable is never started; the only contact with `game\` is a single read-only `File.Exists` check.
 

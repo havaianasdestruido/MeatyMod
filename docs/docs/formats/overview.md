@@ -38,9 +38,13 @@ MeatyMod never writes into `Content\` except through [`install`](../cli/install.
 | Heightmap samples | little-endian `ushort` |
 | Text assets | read with `File.OpenText` (UTF-8 with BOM detection) |
 | `checksums.txt` | UTF-8 **without** BOM |
-| Numeric parsing | always `CultureInfo.InvariantCulture` |
+| Numeric parsing | format readers pass `CultureInfo.InvariantCulture` explicitly (`TxtDocument.TryGetInt` / `TryGetFloat`, `CameraTrackParser`) |
 | Hashes | lower-case hex SHA-256 |
 | Paths inside archives | forward slashes |
+
+:::note One exception to the parsing rule
+The `All values numeric: True` line printed by [`parse`](../cli/parse.md) is a diagnostic, not a reader. `ParseCommand.Run` tests each line with the culture-sensitive `int.TryParse(line, out _)` / `float.TryParse(line, out _)` overloads rather than the invariant ones. It makes no observable difference today, because `Directory.Build.props` sets `InvariantGlobalization=true` and the current culture *is* the invariant culture — but do not copy that call shape into a reader, where the setting might not hold.
+:::
 
 ## Quick identification
 

@@ -44,6 +44,29 @@ const config: Config = {
     locales: ['en'],
   },
 
+  // Web fonts are requested from the document head rather than with an
+  // `@import` inside custom.css: an `@import` is only discovered after the
+  // stylesheet has been fetched and parsed, which serialises the requests and
+  // delays first paint. `preconnect` warms the connection in parallel.
+  // The matching markup lives in site/_includes/head.html.
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
+    },
+    {
+      tagName: 'link',
+      attributes: {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous'},
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap',
+      },
+    },
+  ],
+
   markdown: {
     mermaid: true,
     hooks: {

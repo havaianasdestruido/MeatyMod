@@ -94,12 +94,12 @@ All nine live in `src\MeatyMod.Cli\Commands\`, one file each.
 
 **`InstallCommand`** — two private helpers:
 
-- `static bool IsInside(string root, string path)` — case-insensitive containment test used as the zip-slip guard; equal paths count as inside, otherwise `path` must start with `root` plus a directory separator.
-- `static List<string> VerifyChecksums(ZipArchive archive)` — returns an empty list when `checksums.txt` is absent; splits each line on the first double space; reports malformed lines, missing entries and hash mismatches.
+- `static bool IsInside(string root, string path)` — case-insensitive containment test used as the zip-slip guard; equal paths count as inside, otherwise `path` must start with `root` plus a directory separator. Purely lexical and `OrdinalIgnoreCase` on every platform: no reparse-point resolution, and too permissive about case on a case-sensitive filesystem ([details](../architecture/security-model.md#path-containment-on-install-zip-slip)).
+- `static List<string> VerifyChecksums(ZipArchive archive)` — returns an empty list when `checksums.txt` is absent; splits each line on the first double space; reports malformed lines, missing entries and hash mismatches. It iterates the **listed** paths, so archive entries that `checksums.txt` omits are never hashed.
 
 The file carries `#pragma warning disable CA1515, CA1031` at namespace level (public `ICommand` classes and catch-all `Run` exits are the established convention) and a scoped `CA5389` suppression around the extraction, justified by the containment check above it.
 
-**`InjectCommand`** — the only non-trivial argument parser in the codebase. It first scans for a `--mod` token to choose between flagged and legacy positional mode, then builds parallel `modDllPaths` / `entryTypeNames` lists, tracking a `pendingEntry` so that `--entry` may appear before the `--mod` it belongs to. After patching it deploys each DLL and probes five levels up for `config.txt`. Duplicate DLL file names are tracked with a `HashSet<string>(StringComparer.OrdinalIgnoreCase)`.
+**`InjectCommand`** — the only non-trivial argument parser in the codebase. It first scans for a `--mod` token to choose between flagged and legacy positional mode, then builds parallel `modDllPaths` / `entryTypeNames` lists, keeping them index-aligned. Each `--entry` must **follow** the `--mod` it belongs to: `--entry` is applied to the most recently seen `--mod`, and an `--entry` that appears before any `--mod` is parked in `pendingEntry` and then written back at an index that does not exist yet, which surfaces as `Inject failed: …` and exit `1`. After patching it deploys each DLL and probes five levels up for `config.txt`. Duplicate DLL file names are tracked with a `HashSet<string>(StringComparer.OrdinalIgnoreCase)`.
 
 **`ParseCommand`** — dispatches on the `.raw` extension first, then uses the heuristic `doc.GetString(0).Contains(".") && doc.Count % 6 == 0` to pick the camera-track branch. `RunRaw` guesses dimensions, falls back to 2048 × 2048 and prints width, height, sample count and the min/max height.
 

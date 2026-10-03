@@ -52,7 +52,7 @@ An id with a slash or a space could be interpolated into a path by downstream to
 
 ## JSON Schema
 
-`manifest.schema.json` (draft-07) mirrors the C# rules and can be wired into your editor for completion and inline errors:
+`manifest.schema.json` (draft-07) covers the same fields and can be wired into your editor for completion and inline errors:
 
 ```json
 {
@@ -71,6 +71,18 @@ An id with a slash or a space could be interpolated into a path by downstream to
   }
 }
 ```
+
+:::caution The schema is looser than `ModManifest.Validate`
+Editor validation passing is not the same as the loader accepting the file. The schema is the weaker of the two checks in three places:
+
+| Case | JSON Schema | `ModManifest.Validate` |
+| --- | --- | --- |
+| `"Version": "1"` | accepted — `^\d+(\.\d+)*$` allows a single component | rejected — `System.Version.TryParse` needs 2 to 4 components |
+| `"Name": " "` | accepted — `minLength: 1` counts the space | rejected — `string.IsNullOrWhiteSpace` |
+| `"Author": " "` | accepted, same reason | rejected, same reason |
+
+The C# rules in the [Fields](#fields) table above are authoritative; run `meatymod manifest` or `ModManifestLoader.LoadWithValidation` to check a manifest for real.
+:::
 
 VS Code, for example:
 

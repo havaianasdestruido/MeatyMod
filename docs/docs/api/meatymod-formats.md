@@ -34,7 +34,7 @@ Reads 3 magic chars, then one version byte, then one flags byte, leaving the str
 **Throws** `ArgumentNullException` for a null stream, `InvalidDataException("Not XNB file.")` when the magic is not `XNB`.
 
 :::caution Offsets differ from `XnbContentReader`
-`XnbReader` treats byte 3 as *version* and byte 4 as *flags*. The real XNB layout — implemented by `XnbContentReader` — is magic, **platform**, version, flags. `XnbReader.Version` therefore carries the platform byte (`0x77` `w` for Windows). It is retained for the simple "is this XNB" probe; use `XnbContentReader` for real work.
+`XnbReader` treats byte 3 as *version* and byte 4 as *flags*. The real XNB layout — implemented by `XnbContentReader` — is magic, **platform**, version, flags. Nothing is skipped; both bytes are read, but under the wrong names: `XnbReader.Version` carries the platform byte (`0x77` `w` for Windows) and `XnbReader.Flags` carries the XNB format version byte (`4` or `5`). The actual flags byte, which holds the `0x80` LZX bit, is never read here. It is retained for the simple "is this XNB" probe; use `XnbContentReader` for real work.
 :::
 
 ```csharp
