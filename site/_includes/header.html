@@ -1,0 +1,28 @@
+<a class="skip-link" href="#content">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href="{{ '/' | relative_url }}">
+      <img class="brand__mark" src="{{ '/assets/img/logo.png' | relative_url }}" alt="" width="34" height="34">
+      <span class="brand__name">MeatyMod</span>
+      <span class="brand__ver">v{{ site.version }}</span>
+    </a>
+
+    <!-- Real checkbox: reachable by keyboard on narrow viewports, where the
+         adjacent label is the visible burger. Hidden outright on wide ones,
+         because the full nav is already on screen. -->
+    <input class="nav-toggle" id="nav-toggle" type="checkbox" aria-label="Toggle navigation">
+    <label class="nav-burger" for="nav-toggle">
+      <span></span><span></span><span></span>
+    </label>
+
+    <nav class="site-nav" aria-label="Main">
+      {%- for item in site.nav -%}
+      <a class="site-nav__link{% if page.url == item.url %} is-active{% endif %}"
+         href="{{ item.url | relative_url }}">{{ item.title }}</a>
+      {%- endfor -%}
+      <a class="site-nav__link site-nav__link--docs" href="{{ site.docs_url | relative_url }}">Documentation</a>
+      <a class="site-nav__link site-nav__link--ghost" href="{{ site.repo_url }}" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>

@@ -7,3 +7,12 @@ dist/
 
 # crash log
 unfriendly.txt
+
+# documentation site
+_site/
+site/.sass-cache/
+site/.jekyll-cache/
+site/.jekyll-metadata
+docs/node_modules/
+docs/build/
+docs/.docusaurus/

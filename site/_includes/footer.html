@@ -1,0 +1,47 @@
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <div class="site-footer__col site-footer__col--brand">
+      <a class="brand" href="{{ '/' | relative_url }}">
+        <img class="brand__mark" src="{{ '/assets/img/logo.png' | relative_url }}" alt="" width="30" height="30">
+        <span class="brand__name">MeatyMod</span>
+      </a>
+      <p class="site-footer__blurb">{{ site.tagline }}</p>
+      <p class="site-footer__warn">Only inject mods you trust. <code>meatymod restore</code> always puts the original executable back.</p>
+    </div>
+
+    <div class="site-footer__col">
+      <h2 class="site-footer__h">Documentation</h2>
+      <ul>
+        <li><a href="{{ site.docs_url | relative_url }}">Introduction</a></li>
+        <li><a href="{{ site.docs_url | append: 'getting-started/quickstart' | relative_url }}">Quickstart</a></li>
+        <li><a href="{{ site.docs_url | append: 'cli/overview' | relative_url }}">CLI reference</a></li>
+        <li><a href="{{ site.docs_url | append: 'api/overview' | relative_url }}">API reference</a></li>
+      </ul>
+    </div>
+
+    <div class="site-footer__col">
+      <h2 class="site-footer__h">Guides</h2>
+      <ul>
+        <li><a href="{{ site.docs_url | append: 'architecture/overview' | relative_url }}">Architecture</a></li>
+        <li><a href="{{ site.docs_url | append: 'mods/authoring-a-mod' | relative_url }}">Authoring a mod</a></li>
+        <li><a href="{{ site.docs_url | append: 'formats/overview' | relative_url }}">File formats</a></li>
+        <li><a href="{{ site.docs_url | append: 'reference/troubleshooting' | relative_url }}">Troubleshooting</a></li>
+      </ul>
+    </div>
+
+    <div class="site-footer__col">
+      <h2 class="site-footer__h">Project</h2>
+      <ul>
+        <li><a href="{{ site.repo_url }}" rel="noopener">Repository</a></li>
+        <li><a href="{{ site.repo_url }}/issues" rel="noopener">Issues</a></li>
+        <li><a href="{{ site.docs_url | append: 'development/contributing' | relative_url }}">Contributing</a></li>
+        <li><a href="{{ site.docs_url | append: 'reference/third-party' | relative_url }}">Third-party notices</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="wrap site-footer__legal">
+    <p>MeatyMod {{ site.version }} &mdash; community modding tools for Blood &amp; Bacon. Not affiliated with the game's developers.</p>
+    <p>Site built with Jekyll; documentation built with Docusaurus.</p>
+  </div>
+</footer>

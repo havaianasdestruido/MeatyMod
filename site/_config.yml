@@ -1,0 +1,50 @@
+# Jekyll configuration for the MeatyMod marketing site.
+#
+# This site owns https://havaianasdestruido.github.io/MeatyMod/
+# The Docusaurus documentation owns /MeatyMod/docs/ and is copied into the
+# build output by .github/workflows/docs.yml. Jekyll never touches it.
+
+title: MeatyMod
+tagline: Mod suite and IL injector for Blood & Bacon
+description: >-
+  MeatyMod is a C# mod suite for Blood & Bacon. It packs content mods, injects
+  .NET mod DLLs into the game executable with Mono.Cecil, parses the game's
+  XNB/TXT/RAW asset formats, and restores a patched install in one command.
+
+url: "https://havaianasdestruido.github.io"
+baseurl: "/MeatyMod"
+
+# Where the Docusaurus documentation lives, relative to baseurl.
+docs_url: "/docs/"
+repo_url: "https://github.com/havaianasdestruido/MeatyMod"
+version: "1.0.0"
+
+lang: en
+timezone: Etc/UTC
+permalink: pretty
+
+nav:
+  - title: Install
+    url: /install/
+  - title: Mods
+    url: /mods/
+  - title: CLI
+    url: /cli/
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - README.md
+  - .jekyll-cache
+
+# Defaults keep the front matter of individual pages short.
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page
